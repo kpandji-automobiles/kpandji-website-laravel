@@ -1,0 +1,107 @@
+[
+ {
+  "id": "djetranplus",
+  "name": "DJETRAN PLUS",
+  "brochureHref": "/djetranplus.pdf",
+  "description": {
+   "fr": "Essence : 2.0GDI + boîte automatique 8 vitesses (Puissance : 145 kW / 197 ch, Couple : 360 Nm) Systèmes d'assistance à la conduite intelligents de niveau 2 : régulateur de vitesse adaptatif, alerte de franchissement de ligne, avertisseur de collision frontale, vision panoramique à 360°, allumage automatique des phares, essuie-glaces à induction",
+   "en": "Petrol: 2.0 GDI + 8-speed automatic gearbox (Power: 145 kW / 197 hp, Torque: 360 Nm). Level 2 smart driver-assistance systems: adaptive cruise control, lane-departure warning, forward-collision warning, 360° panoramic vision, automatic headlights, rain-sensing wipers."
+  },
+  "characteristics": [
+   {
+    "fr": "Moteur Essence : 2.0GDI + boîte automatique 8 vitesses",
+    "en": "Petrol engine: 2.0 GDI + 8-speed automatic gearbox"
+   },
+   {
+    "fr": "Puissance : 145 kW / 197 ch, Couple : 360 Nm",
+    "en": "Power: 145 kW / 197 hp, Torque: 360 Nm"
+   },
+   {
+    "fr": "Essence : 2.0GDI + boîte automatique 8 vitesses",
+    "en": "Petrol: 2.0 GDI + 8-speed automatic gearbox"
+   },
+   {
+    "fr": "vision panoramique à 360°, allumage automatique des phares",
+    "en": "360° panoramic vision, automatic headlights"
+   }
+  ],
+  "media": {
+   "topImage": "/models/plus/pic4.jpg",
+   "topVideo": "/models/plus/djetplus.mp4",
+   "bottomLeftImage": "/models/plus/plint2.png",
+   "bottomRightImage": "/models/plus/pic3.png",
+   "slideImage": "/derniers/djetranplus1.png",
+   "bgSlideImage": "/models/plus/back.jpg"
+  }
+ },
+ {
+  "id": "djetran",
+  "name": "DJETRAN",
+  "brochureHref": "/djetranbva.pdf",
+  "description": {
+   "fr": "Turbo Diesel et essence 2,3L, développant 163 chevaux  avec un couple 340 Nm, offran puissance et souplesse pour la route comme le tout-terrain. Cockpit intelligent, caméra 360°, contrôle électronique de stabilité et ABS + EBD. Se distingue par sa puissance et sa transmission intégrale. Il offre aussi un haut niveau de sécurité et de confort technologique.",
+   "en": "2.3L Turbo Diesel and petrol, developing 163 hp with 340 Nm of torque, delivering power and flexibility for both road and off-road driving. Smart cockpit, 360° camera, electronic stability control, and ABS + EBD. Distinguished by its power and all-wheel drive, it also offers a high level of safety and technological comfort."
+  },
+  "characteristics": [
+   {
+    "fr": "Moteur Turbo Diesel et essence 2.3L",
+    "en": "2.3L Turbo Diesel and petrol engine"
+   },
+   {
+    "fr": "163 ch et 340 Nm de couple",
+    "en": "163 hp and 340 Nm of torque"
+   },
+   {
+    "fr": "Transmission intégrale",
+    "en": "All-wheel drive"
+   },
+   {
+    "fr": "Caméra 360° et contrôle de stabilité",
+    "en": "360° camera and stability control"
+   }
+  ],
+  "media": {
+   "topImage": "/models/djet/int2.jpg",
+   "topVideo": "/video.mp4",
+   "bottomLeftImage": "/models/djet/front1.jpg",
+   "bottomRightImage": "/models/djet/back.jpg",
+   "slideImage": "/models/djet/slide1.png",
+   "bgSlideImage": "/models/djet/bgslide2.jpg"
+  }
+ },
+ {
+  "id": "lathaye",
+  "name": "LATHAYE",
+  "brochureHref": "/lathaye.pdf",
+  "description": {
+   "fr": "Avec un moteur 2.0T GDI Turbo compressé de 165 Kw. Transmission automatique CVT à 8 rapports pour une vitesse maximale de 210 km/h. C'est un véritable bilide qui redéfinit la performance à chaque voyage.",
+   "en": "Powered by a 2.0T GDI turbocharged engine developing 165 kW. 8-speed automatic CVT transmission for a top speed of 210 km/h. A true powerhouse that redefines performance on every journey."
+  },
+  "characteristics": [
+   {
+    "fr": "Moteur 2.0T GDI Turbo",
+    "en": "2.0T GDI Turbo engine"
+   },
+   {
+    "fr": "Puissance maximale de 165 kW",
+    "en": "Maximum power of 165 kW"
+   },
+   {
+    "fr": "Boîte automatique CVT à 8 vitesses",
+    "en": "8-speed automatic CVT gearbox"
+   },
+   {
+    "fr": "Vitesse maximale de 210 km/h",
+    "en": "Top speed of 210 km/h"
+   }
+  ],
+  "media": {
+   "topImage": "/models/lath/pic3.jpg",
+   "topVideo": "/videolat.mp4",
+   "bottomLeftImage": "/models/lath/pic4.jpg",
+   "bottomRightImage": "/models/lath/pic5.jpg",
+   "slideImage": "/derniers/lathaye.png",
+   "bgSlideImage": "/derniers/backlat.png"
+  }
+ }
+]

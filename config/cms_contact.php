@@ -1,0 +1,60 @@
+<?php
+/* Champs CMS de /contact (components/kp/ContactPageContent.tsx + ContactForm.tsx) — fusionnés dans config/cms.php ['fields']. Onglet « contactp ». */
+$T = 'contactp';
+$P = function (string $k, string $type, string $label, string $fr, string $en) use ($T) {
+    return ["$T.$k" => [$T, $type, "$label (FR)", $fr], "$T.{$k}_en" => [$T, $type, "$label (EN)", $en]];
+};
+return array_merge(
+  [
+    'contactp.seo_title' => [$T, 'text', 'SEO — titre de l\'onglet', 'Contact — KPANDJI AUTOMOBILES'],
+    'contactp.seo_description' => [$T, 'textarea', 'SEO — description', 'Écrivez à KPANDJI AUTOMOBILES : renseignements sur la gamme, disponibilité, partenariat ou service après-vente.'],
+    'contactp.og_title' => [$T, 'text', 'Open Graph — titre (partage)', 'Contact — KPANDJI AUTOMOBILES'],
+    'contactp.og_description' => [$T, 'textarea', 'Open Graph — description (partage)', 'Contactez l’équipe KPANDJI pour toute question sur nos véhicules et services.'],
+  ],
+  $P('h1', 'text', 'En-tête — titre', 'Une équipe à votre écoute', 'A team that listens'),
+  $P('access_label', 'text', 'Accès directs — surtitre', 'Accès directs', 'Direct access'),
+  $P('email_label', 'text', 'Carte e-mail — libellé', 'Courriel', 'Email'),
+  [
+    'contactp.email' => [$T, 'text', 'Carte e-mail — adresse affichée', 'contact@kpandji.com'],
+    'contactp.email_link' => [$T, 'url', 'Carte e-mail — lien', 'mailto:contact@kpandji.com'],
+  ],
+  $P('hq_label', 'text', 'Carte siège — libellé', 'Siège', 'Headquarters'),
+  $P('hq_title', 'text', 'Carte siège — pays', 'Côte d\'Ivoire', 'Ivory Coast'),
+  $P('hq_text', 'text', 'Carte siège — ligne', 'KPANDJI AUTOMOBILES — constructeur automobile', 'KPANDJI AUTOMOBILES — automobile manufacturer'),
+  $P('f_kicker', 'text', 'Formulaire — surtitre', 'Formulaire', 'Form'),
+  $P('f_title', 'text', 'Formulaire — titre', 'Votre message', 'Your message'),
+  $P('f_intro', 'textarea', 'Formulaire — introduction', 'Les champs marqués d’un astérisque sont obligatoires. Notre équipe vous répondra dans les meilleurs délais.', 'Fields marked with an asterisk are required. Our team will respond as soon as possible.'),
+  $P('f_sec1', 'text', 'Formulaire — rubrique 1', 'Identité & coordonnées', 'Identity & contact details'),
+  $P('f_name', 'text', 'Champ — nom', 'Nom et prénom', 'Full name'),
+  ['contactp.f_name_ph' => [$T, 'text', 'Champ — nom (exemple)', 'Jean Kouassi']],
+  $P('f_email', 'text', 'Champ — e-mail', 'E-mail', 'Email'),
+  ['contactp.f_email_ph' => [$T, 'text', 'Champ — e-mail (exemple)', 'vous@exemple.com']],
+  $P('f_phone', 'text', 'Champ — téléphone', 'Téléphone', 'Phone'),
+  $P('f_optional', 'text', 'Champ — mention « optionnel »', 'optionnel', 'optional'),
+  ['contactp.f_phone_ph' => [$T, 'text', 'Champ — téléphone (exemple)', '+225 …']],
+  $P('f_sec2', 'text', 'Formulaire — rubrique 2', 'Message', 'Message'),
+  $P('f_subject', 'text', 'Champ — sujet', 'Sujet', 'Subject'),
+  ['contactp.subjects' => [$T, 'list', 'Sujets proposés (boutons)', [
+      ['fr' => 'Reserver un essai', 'en' => 'Book a test drive'],
+      ['fr' => 'Découvrir l\'offre SIRA', 'en' => 'Discover the SIRA offer'],
+      ['fr' => 'Investir depuis l\'étranger', 'en' => 'Invest from abroad'],
+      ['fr' => 'Demande d\'information', 'en' => 'Request information'],
+      ['fr' => 'Contacter S.A.V', 'en' => 'Contact after-sales'],
+      ['fr' => 'Demande de devis', 'en' => 'Request a quote'],
+  ], ['fr' => 'Sujet FR', 'en' => 'Sujet EN']]],
+  $P('f_subject_ph', 'text', 'Champ — sujet (exemple)', 'Choisissez une option ci-dessus Ou précisez votre sujet…', 'Choose an option above or specify your subject…'),
+  $P('f_message', 'text', 'Champ — message', 'Votre texte', 'Your message'),
+  $P('f_message_ph', 'text', 'Champ — message (exemple)', 'Décrivez votre demande : modèle souhaité, délai, questions…', 'Describe your request: desired model, timeline, questions…'),
+  $P('f_submit', 'text', 'Bouton — envoyer', 'Envoyer le message', 'Send message'),
+  $P('f_sending', 'text', 'Bouton — envoi en cours', 'Envoi en cours…', 'Sending…'),
+  $P('f_privacy', 'text', 'Mention données', 'Données utilisées uniquement pour vous répondre.', 'Your data is only used to respond to you.'),
+  $P('f_ok_title', 'text', 'Succès — titre', 'Message envoyé', 'Message sent'),
+  $P('f_ok_text', 'textarea', 'Succès — texte', 'Merci. Nous avons bien reçu votre message et vous recontacterons par e-mail ou téléphone.', 'Thank you. We\'ve received your message and will get back to you by email or phone.'),
+  $P('e_name', 'text', 'Erreur — nom', 'Indiquez votre nom.', 'Please enter your name.'),
+  $P('e_email', 'text', 'Erreur — e-mail manquant', 'Indiquez votre adresse e-mail.', 'Please enter your email address.'),
+  $P('e_email_invalid', 'text', 'Erreur — e-mail invalide', 'Adresse e-mail invalide.', 'Invalid email address.'),
+  $P('e_subject', 'text', 'Erreur — sujet', 'Indiquez un sujet.', 'Please enter a subject.'),
+  $P('e_message', 'text', 'Erreur — message', 'Écrivez votre message.', 'Please write your message.'),
+  $P('e_server', 'text', 'Erreur — serveur', 'Une erreur est survenue. Réessayez plus tard.', 'An error occurred. Please try again later.'),
+  $P('e_network', 'text', 'Erreur — connexion', 'Impossible d\'envoyer le message. Vérifiez votre connexion.', 'Unable to send the message. Please check your connection.'),
+);

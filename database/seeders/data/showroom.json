@@ -1,0 +1,225 @@
+[
+ {
+  "id": "djetranplus",
+  "name": "DJETRAN PLUS",
+  "badge": {
+   "fr": "Nouveau",
+   "en": "New"
+  },
+  "tagline": {
+   "fr": "Pick-up premium, diesel ou essence, assistance niveau 2.",
+   "en": "Premium pick-up, diesel or petrol, level 2 driving assistance."
+  },
+  "description": {
+   "fr": "Motorisations essence 2.0 GDI (197 ch, 360 Nm). Régulateur adaptatif, alerte de ligne, collision frontale, vision 360° et équipements de confort haut de gamme.",
+   "en": "2.0 GDI petrol engine (197 hp, 360 Nm). Adaptive cruise control, lane-departure warning, forward-collision warning, 360° vision, and premium comfort equipment."
+  },
+  "brochureHref": "/djetranplus.pdf",
+  "highlights": [
+   {
+    "fr": "Diesel 2.3T — 163 ch / 380 Nm",
+    "en": "2.3T diesel — 163 hp / 380 Nm"
+   },
+   {
+    "fr": "Essence 2.0 GDI — 197 ch / 360 Nm",
+    "en": "2.0 GDI petrol — 197 hp / 360 Nm"
+   },
+   {
+    "fr": "Assistance à la conduite niveau 2",
+    "en": "Level 2 driving assistance"
+   },
+   {
+    "fr": "Vision panoramique 360°",
+    "en": "360° panoramic vision"
+   }
+  ],
+  "gallery": [
+   {
+    "src": "/models/showcase/plusext0.jpg",
+    "alt": "DJETRAN PLUS",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/plusext1.jpg",
+    "alt": "DJETRAN PLUS",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/plusext2.jpg",
+    "alt": "DJETRAN PLUS",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/plusext3.jpg",
+    "alt": "DJETRAN PLUS",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/plusext4.jpg",
+    "alt": "DJETRAN PLUS",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/plusext5.jpg",
+    "alt": "DJETRAN PLUS",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/plusint1.jpg",
+    "alt": "DJETRAN PLUS",
+    "tag": "int"
+   },
+   {
+    "src": "/models/showcase/plusint2.jpg",
+    "alt": "DJETRAN PLUS",
+    "tag": "int"
+   }
+  ]
+ },
+ {
+  "id": "djetran",
+  "name": "DJETRAN",
+  "tagline": {
+   "fr": "4×4 robuste pour la route et le tout-terrain.",
+   "en": "A rugged 4×4 built for the road and the off-road."
+  },
+  "description": {
+   "fr": "Turbo Diesel 2,3L, développant 163 chevaux  avec un couple 340 Nm, offran puissance et souplesse pour la route comme le tout-terrain. Cockpit intelligent, caméra 360°, contrôle électronique de stabilité et ABS + EBD. ",
+   "en": "2.3L Turbo Diesel delivering 163 hp with 340 Nm of torque, offering power and flexibility on the road and off it. Smart cockpit, 360° camera, electronic stability control, and ABS + EBD."
+  },
+  "brochureHref": "/djetranbva.pdf",
+  "highlights": [
+   {
+    "fr": "Moteur Turbo Diesel 2.3L",
+    "en": "2.3L Turbo Diesel engine"
+   },
+   {
+    "fr": "163 ch et 340 Nm de couple",
+    "en": "163 hp and 340 Nm of torque"
+   },
+   {
+    "fr": "Transmission intégrale",
+    "en": "All-wheel drive"
+   },
+   {
+    "fr": "Caméra 360° et contrôle de stabilité",
+    "en": "360° camera and stability control"
+   }
+  ],
+  "gallery": [
+   {
+    "src": "/models/showcase/djetext1.jpg",
+    "alt": "DJETRAN",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/djetext2.jpg",
+    "alt": "DJETRAN",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/djetext3.jpg",
+    "alt": "DJETRAN",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/djetext4.jpg",
+    "alt": "DJETRAN",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/djetext5.jpg",
+    "alt": "DJETRAN",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/djetint1.jpg",
+    "alt": "DJETRAN",
+    "tag": "int"
+   },
+   {
+    "src": "/models/showcase/djetint2.jpg",
+    "alt": "DJETRAN",
+    "tag": "int"
+   },
+   {
+    "src": "/models/showcase/djetint3.jpg",
+    "alt": "DJETRAN",
+    "tag": "int"
+   }
+  ]
+ },
+ {
+  "id": "lathaye",
+  "name": "LATHAYE",
+  "tagline": {
+   "fr": "SUV fluide, moderne et performant.",
+   "en": "A smooth, modern, and high-performing SUV."
+  },
+  "description": {
+   "fr": "Avec un moteur 2.0T GDI Turbo compressé de 165 Kw. Transmission automatique CVT à 8 vitesses pour une vitesse maximale de 210 km/h. C'est un véritable bilide qui redéfinit la performance à chaque voyage.",
+   "en": "Powered by a 2.0T GDI turbocharged engine developing 165 kW. 8-speed automatic CVT transmission for a top speed of 210 km/h. A true powerhouse that redefines performance on every journey."
+  },
+  "brochureHref": "/lathaye.pdf",
+  "highlights": [
+   {
+    "fr": "Moteur 2.0T GDI Turbo",
+    "en": "2.0T GDI Turbo engine"
+   },
+   {
+    "fr": "Puissance maximale de 165 kW",
+    "en": "Maximum power of 165 kW"
+   },
+   {
+    "fr": "Boîte automatique CVT à 8 vitesses",
+    "en": "8-speed automatic CVT gearbox"
+   },
+   {
+    "fr": "Vitesse maximale de 210 km/h",
+    "en": "Top speed of 210 km/h"
+   }
+  ],
+  "gallery": [
+   {
+    "src": "/models/showcase/latxt1.jpg",
+    "alt": "LATHAYE",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/latxt2.jpg",
+    "alt": "LATHAYE",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/latxt3.jpg",
+    "alt": "LATHAYE",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/latxt4.jpg",
+    "alt": "LATHAYE",
+    "tag": "ext"
+   },
+   {
+    "src": "/models/showcase/latint1.jpg",
+    "alt": "LATHAYE",
+    "tag": "int"
+   },
+   {
+    "src": "/models/showcase/latint2.jpg",
+    "alt": "LATHAYE",
+    "tag": "int"
+   },
+   {
+    "src": "/models/showcase/latint3.jpg",
+    "alt": "LATHAYE",
+    "tag": "int"
+   },
+   {
+    "src": "/models/showcase/latint4.jpg",
+    "alt": "LATHAYE",
+    "tag": "int"
+   }
+  ]
+ }
+]
