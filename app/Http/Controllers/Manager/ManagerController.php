@@ -105,9 +105,41 @@ class ManagerController extends Controller
     {
         $box = $tab === 'messages' ? $r->input('box') : null;
         if (in_array($box, ['sent', 'received'], true)) {
+            $r->validate([
+                'page' => ['nullable', 'integer', 'min:1'],
+            ]);
+
             $me = $r->user();
-            $convs = \App\Models\Conversation::with(['sender:id,name,email', 'recipient:id,name,email,role'])->withCount('replies')
-                ->where($box === 'sent' ? 'sender_id' : 'recipient_id', $me->id)->latest('id')->get()->each(fn($c) => $c->unread = $c->unreadFor($me));
+
+            // Conversations de la page et compteurs calculés en base.
+            $convs = \App\Models\Conversation::query()
+                ->with([
+                    'sender:id,name,email',
+                    'recipient:id,name,email,role',
+                ])
+                ->withCount([
+                    'replies',
+                    'replies as unread_replies_count' => fn($query) => $query
+                        ->where('user_id', '!=', $me->id)
+                        ->whereNull('read_at'),
+                ])
+                ->where(
+                    $box === 'sent' ? 'sender_id' : 'recipient_id',
+                    $me->id
+                )
+                ->latest('id')
+                ->paginate(10)
+                ->withQueryString();
+
+            $convs->getCollection()->each(function ($conversation) use ($me) {
+                $initialUnread = (
+                    $conversation->recipient_id === $me->id
+                    && !$conversation->read_at
+                ) ? 1 : 0;
+
+                $conversation->unread = $initialUnread
+                    + (int) $conversation->unread_replies_count;
+            });
             return view('spaces.manager.inbox', [
                 'tab' => $tab,
                 'box' => $box,
@@ -117,7 +149,7 @@ class ManagerController extends Controller
                 'sources' => ['contact'],
                 'statuses' => Inbox::STATUSES,
                 'recipients' => $this->recipients($r),
-                'boxCounts' => $this->boxCounts($me)
+                'boxCounts' => $this->boxCounts($me),
             ]);
         }
         $src = Inbox::TABS[$tab] ?? abort(404);

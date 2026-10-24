@@ -28,7 +28,7 @@
     @endif
     @if ($box)
         <div class="sp-card sp-rise overflow-hidden" data-sp-convs="{{ $box }}">
-            <p class="px-5 py-3 text-xs text-white/40">{{ $convs->count() }}</p>
+            <p class="px-5 py-3 text-xs text-white/40">{{ $convs->total() }}</p>
             @forelse($convs as $c)
                 @php $other = $box==='sent' ? $c->recipient : $c->sender; @endphp
                 <a href="{{ route('manager.conversation', $c) }}" data-sp-conv="{{ $c->id }}"
@@ -62,6 +62,12 @@
             @empty <p class="border-t border-white/10 px-5 py-6 text-sm text-white/40">{{ sp_t('none') }}</p>
             @endforelse
         </div>
+
+        @if ($convs->hasPages())
+            <div class="mt-6">
+                {{ $convs->links() }}
+            </div>
+        @endif
     @else
         <form method="GET" data-sp-filters
             class="sp-card sp-rise grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6 lg:items-end">
@@ -104,14 +110,18 @@
         <div class="sp-card sp-rise mt-5 overflow-hidden" style="animation-delay:.1s" data-sp-list="{{ $tab }}">
             <p class="px-5 py-3 text-xs text-white/40">{{ $items->total() }}</p>
             @forelse($items as $i)
-                @if ($items->hasPages())
-                    <div class="mt-6">
-                        {{ $items->links() }}
-                    </div>
-                @endif
-            @include('spaces.manager._row') @empty <p class="border-t border-white/10 px-5 py-6 text-sm text-white/40">
-                    {{ sp_t('none') }}</p>
+                @include('spaces.manager._row')
+            @empty
+                <p class="border-t border-white/10 px-5 py-6 text-sm text-white/40">
+                    {{ sp_t('none') }}
+                </p>
             @endforelse
         </div>
+
+        @if ($items->hasPages())
+            <div class="mt-6">
+                {{ $items->links() }}
+            </div>
+        @endif
     @endif
 @endsection
