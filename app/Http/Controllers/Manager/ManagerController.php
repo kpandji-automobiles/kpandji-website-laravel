@@ -14,14 +14,32 @@ use Illuminate\Validation\Rule;
 /** Espace manager (/espace-manager) — accessible au rôle manager et à l'admin. */
 class ManagerController extends Controller
 {
+    /** Dernières demandes et compteurs calculés en base. */
     public function dashboard()
     {
-        $all = Inbox::all();
+        $counts = Inbox::statusCounts(Inbox::SOURCES);
+
         return view('spaces.manager.dashboard', [
-            'open' => $all->where('status', '!=', 'traite')->count(),
-            'pending' => ClientInvitation::whereNull('accepted_at')->whereNull('revoked_at')->where('expires_at', '>', now())->count(),
-            'clients' => User::where('role', 'client')->count(),
-            'latest' => $all->take(6),
+            'open' => (int) $counts
+                ->except(['traite'])
+                ->sum(),
+
+            'pending' => ClientInvitation::query()
+                ->whereNull('accepted_at')
+                ->whereNull('revoked_at')
+                ->where('expires_at', '>', now())
+                ->count(),
+
+            'clients' => User::query()
+                ->where('role', 'client')
+                ->count(),
+
+            'latest' => Inbox::paginate(
+                Inbox::SOURCES,
+                [],
+                6,
+                1
+            )->getCollection(),
         ]);
     }
 
