@@ -159,10 +159,44 @@ class Inbox
     }
 
     /** Nombre d'éléments « nouveau » par onglet. */
+    /** Compte les nouvelles demandes en base. */
     public static function newCounts(): array
     {
-        $all = self::all();
-        return collect(self::TABS)->map(fn($src) => $all->whereIn('source', $src)->where('status', 'nouveau')->count())->all();
+        $counts = [];
+
+        foreach (self::TABS as $tab => $sources) {
+            $counts[$tab] = 0;
+
+            foreach ($sources as $source) {
+                $table = self::table($source);
+
+                $query = DB::table($table)
+                    ->leftJoin('inbox_statuses as status', function ($join) use ($table, $source) {
+                        $join->on('status.source_id', '=', $table . '.id')
+                            ->where('status.source', '=', $source);
+                    });
+
+                // Distingue les contacts des demandes d’essai.
+                if ($source === 'contact') {
+                    $query->where($table . '.type', 'contact');
+                } elseif ($source === 'essai') {
+                    $query->where($table . '.type', '!=', 'contact');
+                }
+
+                // Le statut explicite est prioritaire.
+                $query->where(function ($statuses) use ($table) {
+                    $statuses->where('status.status', 'nouveau')
+                        ->orWhere(function ($fallback) use ($table) {
+                            $fallback->whereNull('status.status')
+                                ->whereNull($table . '.handled_at');
+                        });
+                });
+
+                $counts[$tab] += (int) $query->count($table . '.id');
+            }
+        }
+
+        return $counts;
     }
 
     public static function find(string $source, int $id): ?array
