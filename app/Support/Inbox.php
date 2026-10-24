@@ -2,6 +2,7 @@
 namespace App\Support;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /** Boîte de réception de l'espace manager : un onglet par formulaire (contact, essai, S.A.V.) + « autres demandes ». */
 class Inbox
@@ -158,6 +159,213 @@ class Inbox
         })->sortByDesc('date')->values();
     }
 
+    /** Charge uniquement les demandes de la page. */
+    public static function paginate(
+        array $sources,
+        array $filters = [],
+        int $perPage = 10,
+        ?int $page = null
+    ): LengthAwarePaginator {
+        // Refuse les filtres non encore pris en charge.
+        if (
+            array_diff(
+                array_keys($filters),
+                ['status', 'replied', 'from', 'to', 'source', 'q']
+            ) !== []
+        ) {
+            throw new \InvalidArgumentException('Filtre non pris en charge.');
+        }
+
+        $sources = array_values(array_unique($sources));
+
+        if (
+            $sources === []
+            || array_diff($sources, self::SOURCES) !== []
+        ) {
+            throw new \InvalidArgumentException('Sources invalides.');
+        }
+
+        $perPage = max(1, min(50, $perPage));
+        $page = max(1, $page ?? LengthAwarePaginator::resolveCurrentPage());
+
+        $union = null;
+
+
+        // Index léger des demandes accessibles dans ces sources.
+        foreach ($sources as $source) {
+            $table = self::table($source);
+
+            $query = self::query($source)
+                ->select([])
+                ->selectRaw('? as source', [$source])
+                ->addSelect($table . '.id', $table . '.created_at as date')
+                ->selectRaw(
+                    "COALESCE(
+                    (SELECT status FROM inbox_statuses
+                     WHERE source = ? AND source_id = $table.id
+                     LIMIT 1),
+                    CASE WHEN $table.handled_at IS NULL
+                         THEN 'nouveau' ELSE 'traite' END
+                ) as status",
+                    [$source]
+                )
+                ->selectSub(
+                    DB::table('inbox_replies')
+                        ->where('source', $source)
+                        ->whereColumn('source_id', $table . '.id')
+                        ->selectRaw('COUNT(*)'),
+                    'replies'
+                );
+
+            // Recherche dans les champs de la source.
+            if (isset($filters['q']) && trim($filters['q']) !== '') {
+                $columns = match ($source) {
+                    'contact' => [
+                        'test_drive_requests.name',
+                        'test_drive_requests.email',
+                        'test_drive_requests.subject',
+                    ],
+                    'essai' => [
+                        'test_drive_requests.name',
+                        'test_drive_requests.email',
+                        'test_drive_requests.subject',
+                        'cars.name',
+                    ],
+                    'sav' => [
+                        'sav_requests.name',
+                        'sav_requests.contact',
+                        'sav_requests.model',
+                    ],
+                    'sira', 'privilege' => [
+                        $table . '.name',
+                        $table . '.email',
+                        $table . '.city',
+                        $table . '.country',
+                    ],
+                    'emplois' => [
+                        'job_applications.full_name',
+                        'job_applications.email',
+                        'job_applications.position',
+                    ],
+                    'client' => [
+                        'users.name',
+                        'users.email',
+                        'client_requests.subject',
+                    ],
+                };
+
+                $term = mb_strtolower(trim($filters['q']));
+
+                // Recherche littérale des caractères spéciaux de LIKE.
+                $term = str_replace(
+                    ['!', '%', '_'],
+                    ['!!', '!%', '!_'],
+                    $term
+                );
+
+                $query->where(function ($search) use ($columns, $term) {
+                    foreach ($columns as $column) {
+                        $search->orWhereRaw(
+                            "LOWER(COALESCE($column, '')) LIKE ? ESCAPE '!'",
+                            ['%' . $term . '%']
+                        );
+                    }
+                });
+            }
+
+            if ($union === null) {
+                $union = $query;
+            } else {
+                $union->unionAll($query);
+            }
+        }
+
+        // Limite appliquée avant le chargement du contenu.
+        $query = DB::query()->fromSub($union, 'requests');
+
+        // Filtrage avant le calcul des pages.
+        if (
+            isset($filters['status'])
+            && $filters['status'] !== ''
+        ) {
+            $query->where('status', $filters['status']);
+        }
+
+
+        // Demandes avec ou sans réponse.
+        if (($filters['replied'] ?? null) === '1') {
+            $query->where('replies', '>', 0);
+        } elseif (($filters['replied'] ?? null) === '0') {
+            $query->where('replies', 0);
+        }
+
+        // Journées de début et de fin incluses.
+        if (isset($filters['from']) && $filters['from'] !== '') {
+            $query->whereDate('date', '>=', $filters['from']);
+        }
+
+        if (isset($filters['to']) && $filters['to'] !== '') {
+            $query->whereDate('date', '<=', $filters['to']);
+        }
+
+        // Limite les résultats à une source de l’onglet.
+        if (isset($filters['source']) && $filters['source'] !== '') {
+            if (!in_array($filters['source'], $sources, true)) {
+                throw new \InvalidArgumentException(
+                    'Source non autorisée dans cet onglet.'
+                );
+            }
+
+            $query->where('source', $filters['source']);
+        }
+
+        $paginator = $query
+            ->orderByDesc('date')
+            ->orderBy('source')
+            ->orderByDesc('id')
+            ->paginate($perPage, ['*'], 'page', $page)
+            ->withQueryString();
+
+
+
+        $index = $paginator->getCollection();
+        $details = collect();
+
+        // Contenu chargé seulement pour les identifiants de la page.
+        foreach ($index->groupBy('source') as $source => $rows) {
+            $table = self::table($source);
+
+            $requests = self::query($source)
+                ->whereIn($table . '.id', $rows->pluck('id')->all())
+                ->get();
+
+            foreach ($requests as $request) {
+                $details->put(
+                    $source . ':' . $request->id,
+                    self::normalize($source, $request)
+                );
+            }
+        }
+
+        // Reconstruction dans l’ordre de la page.
+        $items = $index->map(function ($row) use ($details) {
+            $item = $details->get($row->source . ':' . $row->id);
+
+            if ($item === null) {
+                return null;
+            }
+
+            $item['status'] = $row->status;
+            $item['replies'] = (int) $row->replies;
+
+            return $item;
+        })->filter()->values();
+
+        $paginator->setCollection($items);
+
+        return $paginator;
+    }
+
     /** Nombre d'éléments « nouveau » par onglet. */
     /** Compte les nouvelles demandes en base. */
     public static function newCounts(): array
@@ -216,5 +424,49 @@ class Inbox
     {
         DB::table('inbox_statuses')->updateOrInsert(['source' => $source, 'source_id' => $id], ['status' => $status, 'updated_at' => now(), 'created_at' => now()]);
         DB::table(self::table($source))->where('id', $id)->update(['handled_at' => in_array($status, ['traite', 'annule'], true) ? now() : null]);
+    }
+
+    /** Compte les demandes par statut. */
+    public static function statusCounts(array $sources): Collection
+    {
+        $counts = collect();
+
+        foreach (array_unique($sources) as $source) {
+            if (!in_array($source, self::SOURCES, true)) {
+                throw new \InvalidArgumentException('Source invalide.');
+            }
+
+            $table = self::table($source);
+
+            $query = self::query($source)
+                ->select([])
+                ->selectRaw(
+                    "COALESCE(
+                    (SELECT status FROM inbox_statuses
+                     WHERE source = ? AND source_id = $table.id
+                     LIMIT 1),
+                    CASE WHEN $table.handled_at IS NULL
+                         THEN 'nouveau' ELSE 'traite' END
+                ) as status",
+                    [$source]
+                );
+
+            $groups = DB::query()
+                ->fromSub($query, 'request_statuses')
+                ->select('status')
+                ->selectRaw('COUNT(*) as total')
+                ->groupBy('status')
+                ->get();
+
+            foreach ($groups as $group) {
+                $counts->put(
+                    $group->status,
+                    (int) $counts->get($group->status, 0)
+                    + (int) $group->total
+                );
+            }
+        }
+
+        return $counts;
     }
 }
