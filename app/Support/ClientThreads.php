@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+
 /** Fils et messages accessibles au client selon leur propriétaire. */
 class ClientThreads
 {
@@ -384,9 +385,64 @@ class ClientThreads
     public static function markRead(User $u, ?string $key = null): void
     {
         $now = now();
+        // Lecture globale sans chargement des messages.
         if ($key === null) {
-            foreach (self::all($u)->where('unread', '>', 0) as $t)
-                self::markRead($u, $t['key']);
+            $userId = (int) $u->id;
+
+            if ($userId <= 0) {
+                return;
+            }
+
+            DB::transaction(function () use ($userId, $now) {
+                ClientNotice::query()
+                    ->where('user_id', $userId)
+                    ->whereNull('read_at')
+                    ->update(['read_at' => $now]);
+
+                \App\Models\Conversation::query()
+                    ->where('recipient_id', $userId)
+                    ->whereNull('read_at')
+                    ->update(['read_at' => $now]);
+
+                InboxReply::query()
+                    ->whereNull('read_at')
+                    ->where(function ($query) use ($userId) {
+                        $query->whereNull('user_id')
+                            ->orWhere('user_id', '!=', $userId);
+                    })
+                    ->where(function ($query) use ($userId) {
+                        // Réponses aux demandes possédées.
+                        foreach ([
+                            'client' => 'client_requests',
+                            'sira' => 'sira_requests',
+                            'privilege' => 'privilege_requests',
+                        ] as $source => $table) {
+                            $query->orWhere(function ($group) use ($source, $table, $userId) {
+                                $group->where('source', $source)
+                                    ->whereIn(
+                                        'source_id',
+                                        DB::table($table)
+                                            ->select('id')
+                                            ->where('user_id', $userId)
+                                    );
+                            });
+                        }
+
+                        // Réponses aux conversations reçues.
+                        $query->orWhere(function ($group) use ($userId) {
+                            $group->where('source', 'dm')
+                                ->whereNotNull('user_id')
+                                ->whereIn(
+                                    'source_id',
+                                    \App\Models\Conversation::query()
+                                        ->select('id')
+                                        ->where('recipient_id', $userId)
+                                );
+                        });
+                    })
+                    ->update(['read_at' => $now]);
+            });
+
             return;
         }
         $t = self::find($u, $key);
