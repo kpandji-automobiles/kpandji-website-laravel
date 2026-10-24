@@ -29,6 +29,17 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('test-drive', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
+
+        // Limite les renvois d’invitations par compte.
+        RateLimiter::for('invitation-resend', function (Request $request) {
+            return Limit::perMinute(5)
+                ->by((string) $request->user()->id);
+        });
+        // Limite les réponses aux demandes par compte.
+        RateLimiter::for('manager-reply', function (Request $request) {
+            return Limit::perMinute(10)
+                ->by((string) $request->user()->id);
+        });
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Investment::class, \App\Policies\InvestmentPolicy::class);
 
         // CMS : @content('hero.title1') affiche un contenu éditable (échappé)
