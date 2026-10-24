@@ -220,15 +220,44 @@ class ManagerController extends Controller
         return back()->with('ok', sp_t('reply_done'));
     }
 
+    /** Compteurs des boîtes calculés en base. */
     private function boxCounts(User $me): array
     {
-        $C = \App\Models\Conversation::class;
-        return [
-            'sent' => $C::where('sender_id', $me->id)->count(),
-            'received' => $C::where('recipient_id', $me->id)->count(),
-            'sent_unread' => $C::where('sender_id', $me->id)->get()->sum(fn($c) => $c->unreadFor($me)),
-            'received_unread' => $C::where('recipient_id', $me->id)->get()->sum(fn($c) => $c->unreadFor($me))
-        ];
+        $userId = (int) $me->id;
+        $counts = [];
+
+        foreach ([
+            'sent' => 'sender_id',
+            'received' => 'recipient_id',
+        ] as $box => $column) {
+            $conversations = \App\Models\Conversation::query()
+                ->where($column, $userId);
+
+            $counts[$box] = (int) (clone $conversations)->count();
+
+            // Messages initiaux reçus et non lus.
+            $initialUnread = (clone $conversations)
+                ->where('recipient_id', $userId)
+                ->whereNull('read_at')
+                ->count();
+
+            // Réponses non lues dans les conversations de la boîte.
+            $replyUnread = InboxReply::query()
+                ->where('source', 'dm')
+                ->whereIn(
+                    'source_id',
+                    (clone $conversations)->select('id')
+                )
+                ->where('user_id', '!=', $userId)
+                ->whereNull('read_at')
+                ->count();
+
+            $counts[$box . '_unread'] = (int) (
+                $initialUnread + $replyUnread
+            );
+        }
+
+        return $counts;
     }
 
     // ---------- Messages directs (manager -> utilisateurs) ----------
