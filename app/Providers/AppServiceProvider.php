@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,11 +24,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        // Limite les demandes d’essai par IP.
+        RateLimiter::for('test-drive', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Investment::class, \App\Policies\InvestmentPolicy::class);
 
         // CMS : @content('hero.title1') affiche un contenu éditable (échappé)
-        \Illuminate\Support\Facades\Blade::directive('content', fn ($e) => "<?php echo e(content($e)); ?>");
-        \Illuminate\Support\Facades\Blade::directive('cmsEdit', fn ($e) => "<?php echo cms_edit($e); ?>");
+        \Illuminate\Support\Facades\Blade::directive('content', fn($e) => "<?php echo e(content($e)); ?>");
+        \Illuminate\Support\Facades\Blade::directive('cmsEdit', fn($e) => "<?php echo cms_edit($e); ?>");
 
         // Paramètres promo stockés en base (admin) -> écrasent config/promo.php
         try {
@@ -39,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
                     }
                 }
             }
-        } catch (\Throwable $e) { /* base indisponible : on garde config/promo.php */ }
+        } catch (\Throwable $e) { /* base indisponible : on garde config/promo.php */
+        }
     }
 }

@@ -8,7 +8,9 @@ Route::get('/', [SiteController::class, 'home'])->name('home');
 Route::get('/modeles', [SiteController::class, 'index'])->name('cars.index');
 Route::get('/modeles/{car}', [SiteController::class, 'show'])->name('cars.show');
 Route::get('/demande-essai', [SiteController::class, 'contact'])->name('contact');
-Route::post('/demande-essai', [SiteController::class, 'store'])->name('contact.store');
+Route::post('/demande-essai', [SiteController::class, 'store'])
+    ->middleware('throttle:test-drive')
+    ->name('contact.store');
 
 // Pages du header (KpHeader)
 Route::get('/showroom', [SiteController::class, 'showroom'])->name('showroom');
@@ -148,7 +150,7 @@ Route::prefix('mon-espace')->name('client.')->middleware('role:client')->group(f
     Route::get('/messages/{key}', [Cli::class, 'thread'])->where('key', '[a-z]+-[0-9]+')->name('thread');
     Route::post('/messages/{key}', [Cli::class, 'followUp'])->where('key', '[a-z]+-[0-9]+')->middleware('throttle:10,1')->name('thread.reply');
 });
-Route::bind('inv', fn ($v) => \App\Models\ClientInvitation::findOrFail($v));
+Route::bind('inv', fn($v) => \App\Models\ClientInvitation::findOrFail($v));
 
 // ===== Pages créées dans l'admin (après toutes les routes existantes) =====
 Route::get('/page/{slug}', [PageController::class, 'show'])->where('slug', '[a-z0-9-]+')->name('page.show');
