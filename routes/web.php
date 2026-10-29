@@ -8,7 +8,9 @@ Route::get('/', [SiteController::class, 'home'])->name('home');
 Route::get('/modeles', [SiteController::class, 'index'])->name('cars.index');
 Route::get('/modeles/{car}', [SiteController::class, 'show'])->name('cars.show');
 Route::get('/demande-essai', [SiteController::class, 'contact'])->name('contact');
-Route::post('/demande-essai', [SiteController::class, 'store'])->name('contact.store');
+Route::post('/demande-essai', [SiteController::class, 'store'])
+    ->middleware('throttle:test-drive')
+    ->name('contact.store');
 
 // Pages du header (KpHeader)
 Route::get('/showroom', [SiteController::class, 'showroom'])->name('showroom');
@@ -114,7 +116,9 @@ Route::prefix('espace-manager')->name('manager.')->middleware('role:manager')->g
     Route::get('/', [Mgr::class, 'dashboard'])->name('dashboard');
     Route::get('/invitations', [Mgr::class, 'invitations'])->name('invitations');
     Route::post('/invitations', [Mgr::class, 'invite'])->middleware('throttle:20,1')->name('invitations.store');
-    Route::post('/invitations/{inv}/renvoyer', [Mgr::class, 'resend'])->name('invitations.resend');
+    Route::post('/invitations/{inv}/renvoyer', [Mgr::class, 'resend'])
+        ->middleware('throttle:invitation-resend')
+        ->name('invitations.resend');
     Route::post('/invitations/{inv}/revoquer', [Mgr::class, 'revoke'])->name('invitations.revoke');
     Route::get('/messages', [Mgr::class, 'inbox'])->defaults('tab', 'messages')->name('inbox');
     Route::post('/messages/ecrire', [Mgr::class, 'compose'])->middleware('throttle:10,1')->name('compose');
@@ -127,7 +131,10 @@ Route::prefix('espace-manager')->name('manager.')->middleware('role:manager')->g
     Route::post('/comptes/{user}/refuser', [Mgr::class, 'refuse'])->name('accounts.refuse');
     Route::get('/messages/{source}/{id}', [Mgr::class, 'message'])->whereNumber('id')->name('message');
     Route::patch('/messages/{source}/{id}', [Mgr::class, 'status'])->whereNumber('id')->name('message.status');
-    Route::post('/messages/{source}/{id}/repondre', [Mgr::class, 'reply'])->whereNumber('id')->name('message.reply');
+    Route::post('/messages/{source}/{id}/repondre', [Mgr::class, 'reply'])
+        ->middleware('throttle:manager-reply')
+        ->whereNumber('id')
+        ->name('message.reply');
     Route::get('/clients', [Mgr::class, 'clients'])->name('clients');
     Route::get('/clients/{user}', [Mgr::class, 'client'])->name('client');
     Route::post('/clients/{user}/investissements', [Mgr::class, 'storeInvestment'])->name('investments.store');
@@ -148,7 +155,7 @@ Route::prefix('mon-espace')->name('client.')->middleware('role:client')->group(f
     Route::get('/messages/{key}', [Cli::class, 'thread'])->where('key', '[a-z]+-[0-9]+')->name('thread');
     Route::post('/messages/{key}', [Cli::class, 'followUp'])->where('key', '[a-z]+-[0-9]+')->middleware('throttle:10,1')->name('thread.reply');
 });
-Route::bind('inv', fn ($v) => \App\Models\ClientInvitation::findOrFail($v));
+Route::bind('inv', fn($v) => \App\Models\ClientInvitation::findOrFail($v));
 
 // ===== Pages créées dans l'admin (après toutes les routes existantes) =====
 Route::get('/page/{slug}', [PageController::class, 'show'])->where('slug', '[a-z0-9-]+')->name('page.show');

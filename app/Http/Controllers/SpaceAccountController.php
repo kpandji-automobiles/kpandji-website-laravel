@@ -13,24 +13,31 @@ class SpaceAccountController extends Controller
     public function waiting(Request $r)
     {
         $u = $r->user();
-        if ($u->isActive()) return redirect($u->workspaceUrl() ?? route('home'));
+        if ($u->isActive())
+            return redirect($u->workspaceUrl() ?? route('home'));
         return view('spaces.waiting', ['u' => $u]);
     }
 
-    public function password() { return view('spaces.password'); }
+    public function password()
+    {
+        return view('spaces.password');
+    }
 
     public function updatePassword(Request $r)
     {
         $r->validate(['current' => 'required|string', 'password' => 'required|string|min:8|confirmed']);
-        if (! Hash::check($r->current, $r->user()->password)) return back()->withErrors(['current' => sp_t('pw_wrong')]);
+        if (!Hash::check($r->current, $r->user()->password))
+            return back()->withErrors(['current' => sp_t('pw_wrong')]);
         $r->user()->forceFill(['password' => $r->password])->save();
+        // Renouvelle la session et le jeton CSRF.
+        $r->session()->regenerate(true);
         return back()->with('ok', sp_t('pw_done'));
     }
 
     private function valid(string $token): ?ClientInvitation
     {
         $inv = ClientInvitation::findByToken($token);
-        return $inv && $inv->state() === 'pending' && ! User::where('email', $inv->email)->exists() ? $inv : null;
+        return $inv && $inv->state() === 'pending' && !User::where('email', $inv->email)->exists() ? $inv : null;
     }
 
     public function show(Request $r, string $token)
@@ -48,7 +55,8 @@ class SpaceAccountController extends Controller
             $inv->forceFill(['accepted_at' => now(), 'user_id' => $u->id])->save();
             return $u;
         });
-        Auth::login($user); $r->session()->regenerate();
+        Auth::login($user);
+        $r->session()->regenerate();
         return redirect()->route('space.waiting');
     }
 }
