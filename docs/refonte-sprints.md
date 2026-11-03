@@ -26,10 +26,10 @@ Branche : `refonte` (PR vers `main` en fin de refonte). Une fonctionnalité term
 | # | Fonctionnalité | Remplace |
 |---|---|---|
 | 1.1 | ✅ `e971478` Ressource **Voitures** (CRUD, image, brochure, visibilité, ordre glisser-déposer) | `Admin\CarController` |
-| 1.2 | Ressource **Modèles** accueil + showroom (FR/EN, médias, galerie) | `Admin\ModeleController`, `ShowroomController` |
-| 1.3 | Ressource **Pages libres** (HTML filtré, SEO, menu) | `Admin\PageController` |
-| 1.4 | Page **Promotion** (titre, réduction, date de fin) | `DashboardController@promo` |
-| 1.5 | Page **Contenus** : formulaires générés depuis `config/cms*.php`, un onglet par rubrique | `ContentController`, Brand/Eco/Contact/Sav/Sira/Privilege/Emplois (contenus) |
+| 1.2 | ✅ `cabe608` Ressource **Modèles** accueil + showroom (FR/EN, médias, galerie) | `Admin\ModeleController`, `ShowroomController` |
+| 1.3 | ✅ `0bb494a` Ressource **Pages libres** (HTML filtré, SEO, menu) | `Admin\PageController` |
+| 1.4 | ✅ `968f111` Page **Promotion** (titre, réduction, date de fin) | `DashboardController@promo` |
+| 1.5 | ✅ `a0d5423` Page **Contenus** : formulaires générés depuis `config/cms*.php`, un onglet par rubrique | `ContentController`, Brand/Eco/Contact/Sav/Sira/Privilege/Emplois (contenus) |
 
 ## Sprint 2 — Back-office : demandes
 
