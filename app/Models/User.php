@@ -31,10 +31,14 @@ class User extends Authenticatable implements FilamentUser
         return (bool) $this->is_admin || $this->role === 'admin';
     }
 
-    /** Back-office Filament : réservé aux administrateurs. */
+    /** Back-office (/backoffice) : admins ; espace manager (/manager) : managers actifs et admins. */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->isAdmin();
+        return match ($panel->getId()) {
+            'admin' => $this->isAdmin(),
+            'manager' => $this->isManager(),
+            default => false,
+        };
     }
 
     /** Manager OU admin (l'admin a accès à tout l'espace manager). */
