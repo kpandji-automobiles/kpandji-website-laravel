@@ -30,6 +30,8 @@ return [
 
     'deploy' => [
         'token' => env('DEPLOY_HOOK_TOKEN'),
+        // Dossier releases/ ; par défaut le parent de la release en ligne.
+        'releases_path' => env('DEPLOY_RELEASES_PATH'),
     ],
 
     'slack' => [

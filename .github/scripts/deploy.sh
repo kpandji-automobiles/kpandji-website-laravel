@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Déploie le dossier courant (déjà buildé, vendor inclus) sur l'hébergement cPanel, sans accès shell :
-#   1. upload SFTP dans releases/<RELEASE> ; les gros fichiers inchangés depuis la release en ligne
-#      sont liés en dur au lieu d'être renvoyés (médias de public/ : ~200 Mo)
+#   1. upload dans releases/<RELEASE> : une archive zip que la release en ligne décompresse
+#      (POST /_deploy/unpack), sinon fichier par fichier ; les gros fichiers inchangés depuis la
+#      release en ligne sont liés en dur au lieu d'être renvoyés (médias de public/ : ~200 Mo)
 #   2. liens storage et .env vers shared/
 #   3. bascule atomique du lien current
 #   4. finalisation (migrate, storage:link, optimize) via POST /_deploy/finalize
-#   5. health-check, puis nettoyage des anciennes releases
+#   5. health-check, puis nettoyage des anciennes releases (POST /_deploy/prune, sinon SFTP)
 #
 # Usage : deploy.sh deploy | deploy.sh rollback
 #
@@ -80,12 +81,42 @@ rename current.new current
 EOF
 }
 
+# POST $APP_URL/_deploy/<action> avec le token ; réponse dans $WORK/<action>.json, affiche le code HTTP.
+hook() {
+    local action="$1"
+    shift
+    curl -sS -o "$WORK/$action.json" -w '%{http_code}' --max-time 600 -X POST \
+        -H "Authorization: Bearer $DEPLOY_HOOK_TOKEN" -H 'Accept: application/json' \
+        "$@" "$APP_URL/_deploy/$action"
+}
+
+# Envoie la release : une archive décompressée sur le serveur par la release en ligne (un seul fichier
+# au lieu de ~7 000 allers-retours SFTP). Repli fichier par fichier si la release en ligne n'a pas
+# encore la route (HTTP 404) ou si PHP n'a pas ZipArchive (HTTP 501).
+upload_release() {
+    local code
+    echo "Archive de la release…"
+    zip -qr -X "$WORK/release.zip" .
+    echo "Upload de l'archive ($(du -h "$WORK/release.zip" | cut -f1))…"
+    remote > /dev/null <<EOF
+-mkdir releases/$RELEASE
+put $WORK/release.zip releases/$RELEASE/release.zip
+EOF
+    code="$(hook unpack --data-urlencode "release=$RELEASE")" || code=000
+    case "$code" in
+        200) echo "Archive décompressée sur le serveur : $(cat "$WORK/unpack.json")" ;;
+        404|501)
+            echo "Décompression côté serveur indisponible (HTTP $code) : upload fichier par fichier…"
+            remote <<< "-rm releases/$RELEASE/release.zip" > /dev/null
+            lftp_run "mirror --reverse --parallel=8 --verbose=0 . releases/$RELEASE" ;;
+        *) echo "Décompression en échec (HTTP $code) :"; cat "$WORK/unpack.json" 2> /dev/null; echo; return 1 ;;
+    esac
+}
+
 finalize() {
     local code
     for attempt in $(seq 1 30); do
-        code="$(curl -sS -o "$WORK/finalize.json" -w '%{http_code}' -X POST \
-            -H "Authorization: Bearer $DEPLOY_HOOK_TOKEN" -H 'Accept: application/json' \
-            --data-urlencode "release=$RELEASE" "$APP_URL/_deploy/finalize")" || code=000
+        code="$(hook finalize --data-urlencode "release=$RELEASE")" || code=000
         case "$code" in
             200) cat "$WORK/finalize.json"; echo; return 0 ;;
             # 409 : PHP sert encore l'ancienne release (cache realpath) ; 404/5xx passerelle : idem pendant la bascule.
@@ -98,7 +129,14 @@ finalize() {
 }
 
 prune() {
-    local live="$1" previous="$2"
+    local live="$1" previous="$2" code
+    code="$(hook prune --data-urlencode "keep=$KEEP_RELEASES" \
+        --data-urlencode "protect[]=$live" --data-urlencode "protect[]=$previous")" || code=000
+    if [ "$code" = 200 ]; then
+        echo "Anciennes releases supprimées sur le serveur : $(cat "$WORK/prune.json")"
+        return 0
+    fi
+    echo "Purge côté serveur indisponible (HTTP $code) : suppression par SFTP."
     remote <<< "ls -1 releases" | grep -E '^releases/[0-9]{14}-[0-9a-f]{7}$' | sed 's#^releases/##' | sort > "$WORK/releases" || true
     local total
     total="$(wc -l < "$WORK/releases" | tr -d ' ')"
@@ -117,8 +155,7 @@ deploy() {
     echo "Release en ligne : ${previous:-aucune} → nouvelle release : $RELEASE"
 
     hold_unchanged_files "$previous"
-    echo "Upload des fichiers…"
-    lftp_run "mirror --reverse --parallel=8 --verbose=0 . releases/$RELEASE"
+    upload_release
     link_held_files "$previous"
 
     echo "Liens partagés et bascule de current…"

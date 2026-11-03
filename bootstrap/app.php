@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DeployController;
+use App\Http\Controllers\DeployReleaseController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -18,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
             // Pas de throttle : son cache en base n'existe pas avant la première migration.
             Route::post('/_deploy/finalize', DeployController::class)
                 ->name('deploy.finalize');
+            // Exécutées par la release en ligne : décompression de la nouvelle release, purge des anciennes.
+            Route::post('/_deploy/unpack', [DeployReleaseController::class, 'unpack'])
+                ->name('deploy.unpack');
+            Route::post('/_deploy/prune', [DeployReleaseController::class, 'prune'])
+                ->name('deploy.prune');
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
