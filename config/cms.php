@@ -262,6 +262,7 @@ return [
         'footer.email' => ['footer', 'text', 'Contact — adresse e-mail', 'contact@kpandji.com'],
         'footer.rights' => ['footer', 'text', 'Mention de droits (après « © année KPANDJI AUTOMOBILES. »)', 'Tous droits réservés.'],
         'footer.back_to_top' => ['footer', 'text', 'Bouton haut de page', 'Haut de page'],
+        'footer.admin_label' => ['footer', 'text', 'Lien de connexion au backoffice (bas de page)', 'Espace admin'],
 
         // ---------------- FORMULAIRE D'ESSAI ----------------
         'form.page_title' => ['form', 'text', 'Titre de l\'onglet', "Demande d'essai"],

@@ -52,10 +52,13 @@
   @endif
   <div class="kp-site-footer__legal">
     <span>© {{ now()->year }} KPANDJI AUTOMOBILES. {{ content('footer.rights') }}</span>
-    @auth
-      <a href="{{ auth()->user()->workspaceUrl() ?? route('home') }}">Mon espace</a>
-    @else
-      <a href="{{ route('connexion') }}" x-data @click.prevent="$dispatch('kp-login')">{{ content('header.account_label') }}</a>
-    @endauth
+    <span class="kp-site-footer__account">
+      @auth
+        <a href="{{ auth()->user()->workspaceUrl() ?? route('home') }}">Mon espace</a>
+      @else
+        <a href="{{ route('connexion') }}" x-data @click.prevent="$dispatch('kp-login')">{{ content('header.account_label') }}</a>
+        <a href="{{ filament()->getPanel('admin')->getLoginUrl() }}">{{ content('footer.admin_label') }}</a>
+      @endauth
+    </span>
   </div>
 </footer>
