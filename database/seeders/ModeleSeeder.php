@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Models\Modele;
@@ -15,8 +16,14 @@ class ModeleSeeder extends Seeder
         // Showroom virtuel (components/kp/VirtualShowroom.tsx › MODELS) — complète uniquement les champs vides
         foreach (json_decode(file_get_contents(__DIR__.'/data/showroom.json'), true) as $i => $m) {
             $row = Modele::firstOrNew(['key' => $m['id']]);
-            if (! $row->exists) $row->fill(['name' => $m['name'], 'car_slug' => self::CAR[$m['id']] ?? null, 'sort' => 100 + $i, 'is_active' => false]);
-            if ($row->gallery !== null || $row->tagline_fr !== null) { $row->save(); continue; }
+            if (! $row->exists) {
+                $row->fill(['name' => $m['name'], 'car_slug' => self::CAR[$m['id']] ?? null, 'sort' => 100 + $i, 'is_active' => false]);
+            }
+            if ($row->gallery !== null || $row->tagline_fr !== null) {
+                $row->save();
+
+                continue;
+            }
             $row->fill([
                 'in_showroom' => true,
                 'badge_fr' => $m['badge']['fr'] ?? null, 'badge_en' => $m['badge']['en'] ?? null,

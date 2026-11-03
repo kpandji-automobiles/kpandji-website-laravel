@@ -1,7 +1,10 @@
 <?php
+
 namespace Database\Seeders;
+
 use App\Models\Car;
 use Illuminate\Database\Seeder;
+
 /*
 | Sources : KPANDJI-BANCO-BVA-Fiche-technique.pdf (BANCO) et projet "kpandji2026 final" (data/modeles.ts).
 | ⚠️ PRIX : aucun prix n'a été trouvé dans les sources. 'price' et 'promo_price' sont à null
@@ -27,7 +30,7 @@ class CarSeeder extends Seeder
             ],
             [
                 'slug' => 'djetran', 'name' => 'DJETRAN', 'category' => 'Pick-up 4x4',
-                'description' => "Turbo Diesel et essence 2,3 L, développant 163 chevaux avec un couple de 340 Nm, offrant puissance et souplesse pour la route comme le tout-terrain. Cockpit intelligent, caméra 360°, contrôle électronique de stabilité et ABS + EBD. Se distingue par sa puissance et sa transmission intégrale.",
+                'description' => 'Turbo Diesel et essence 2,3 L, développant 163 chevaux avec un couple de 340 Nm, offrant puissance et souplesse pour la route comme le tout-terrain. Cockpit intelligent, caméra 360°, contrôle électronique de stabilité et ABS + EBD. Se distingue par sa puissance et sa transmission intégrale.',
                 'highlights' => ['Turbo Diesel / Essence 2.3 L', '163 ch – 340 Nm', 'Transmission intégrale', 'Caméra 360° & contrôle de stabilité'],
                 'specs' => [
                     'Motorisation' => ['Moteur' => 'Turbo Diesel et essence 2.3 L', 'Puissance' => '163 ch', 'Couple' => '340 Nm', 'Transmission' => 'Intégrale'],
@@ -37,7 +40,7 @@ class CarSeeder extends Seeder
             ],
             [
                 'slug' => 'lathaye', 'name' => 'LATHAYE', 'category' => 'SUV',
-                'description' => "Avec un moteur 2.0T GDI Turbo compressé de 165 kW. Transmission automatique CVT à 8 rapports pour une vitesse maximale de 210 km/h. Un véritable bolide qui redéfinit la performance à chaque voyage.",
+                'description' => 'Avec un moteur 2.0T GDI Turbo compressé de 165 kW. Transmission automatique CVT à 8 rapports pour une vitesse maximale de 210 km/h. Un véritable bolide qui redéfinit la performance à chaque voyage.',
                 'highlights' => ['Moteur 2.0T GDI Turbo', '165 kW', 'Boîte automatique CVT 8 vitesses', 'Vitesse max. 210 km/h'],
                 'specs' => [
                     'Motorisation' => ['Moteur' => '2.0T GDI Turbo', 'Puissance maximale' => '165 kW', 'Transmission' => 'Automatique CVT 8 rapports', 'Vitesse maximale' => '210 km/h'],
@@ -60,7 +63,7 @@ class CarSeeder extends Seeder
             // ===== Modèles ajoutés depuis « TARIF CAMPAGNE V.xlsx » (données du fichier uniquement) =====
             [
                 'slug' => 'kambie', 'name' => 'KAMBIE intelligente', 'category' => 'SUV hybride rechargeable (PHEV)',
-                'description' => "SUV hybride rechargeable : moteur 1,5 L turbo essence associé à un moteur électrique, batterie LFP 21,2 kWh, boîte hybride DHT, traction 4x2.",
+                'description' => 'SUV hybride rechargeable : moteur 1,5 L turbo essence associé à un moteur électrique, batterie LFP 21,2 kWh, boîte hybride DHT, traction 4x2.',
                 'highlights' => ['Hybride rechargeable (PHEV)', '1,5 L turbo essence + électrique', 'Batterie LFP 21,2 kWh', 'Boîte hybride DHT – 4x2 traction'],
                 'specs' => ['Motorisation' => ['Version' => 'SUV hybride rechargeable (PHEV)', 'Motorisation' => '1,5 L turbo essence + moteur électrique, batterie LFP 21,2 kWh', 'Boîte' => 'Hybride DHT', 'Transmission' => '4x2 traction'], 'Garantie' => ['Garantie constructeur' => 'Proposition : 3 ans / 100 000 km · batterie 8 ans / 150 000 km']],
                 'image' => 'images/cars/placeholder.svg', 'hero_image' => 'images/cars/placeholder.svg',
@@ -68,7 +71,7 @@ class CarSeeder extends Seeder
             ],
             [
                 'slug' => 'klaman-pros', 'name' => 'KLAMAN PROS', 'category' => 'SUV 100 % électrique (EV)',
-                'description' => "SUV 100 % électrique : moteur 120 kW, batterie LFP 48 ou 61 kWh, réducteur 1 rapport, traction 4x2.",
+                'description' => 'SUV 100 % électrique : moteur 120 kW, batterie LFP 48 ou 61 kWh, réducteur 1 rapport, traction 4x2.',
                 'highlights' => ['100 % électrique', 'Moteur 120 kW', 'Batterie LFP 48 ou 61 kWh', 'Réducteur 1 rapport – 4x2 traction'],
                 'specs' => ['Motorisation' => ['Version' => 'SUV 100 % électrique (EV)', 'Motorisation' => 'Électrique 120 kW, batterie LFP 48 ou 61 kWh', 'Boîte' => 'Réducteur 1 rapport', 'Transmission' => '4x2 traction'], 'Garantie' => ['Garantie constructeur' => 'Proposition : 3 ans / 100 000 km · batterie 8 ans / 150 000 km']],
                 'image' => 'images/cars/placeholder.svg', 'hero_image' => 'images/cars/placeholder.svg',
@@ -76,7 +79,7 @@ class CarSeeder extends Seeder
             ],
             [
                 'slug' => 'souralai', 'name' => 'SOURALAI', 'category' => 'SUV essence CVT',
-                'description' => "SUV polyvalent pour les déplacements du quotidien : moteur 1,5 L essence, boîte CVT, transmission 4x2.",
+                'description' => 'SUV polyvalent pour les déplacements du quotidien : moteur 1,5 L essence, boîte CVT, transmission 4x2.',
                 'highlights' => ['Moteur 1,5 L essence', 'Boîte automatique CVT', 'Transmission 4x2', 'Garantie 3 ans / 100 000 km'],
                 'specs' => ['Motorisation' => ['Version' => 'SUV essence CVT', 'Motorisation' => '1,5 L essence', 'Boîte' => 'CVT', 'Transmission' => '4x2'], 'Garantie' => ['Garantie constructeur' => 'Proposition : 3 ans / 100 000 km']],
                 'image' => 'mycars/souralay/soural.png', 'hero_image' => 'mycars/souralay/soural.png', 'brochure' => 'fiches/souralai-suv.pdf',
@@ -84,7 +87,7 @@ class CarSeeder extends Seeder
             ],
             [
                 'slug' => 'gemba', 'name' => 'GEMBA', 'category' => 'Mini van essence BVM',
-                'description' => "Mini van : moteur 1,5 L essence, boîte manuelle, transmission 4x2 propulsion.",
+                'description' => 'Mini van : moteur 1,5 L essence, boîte manuelle, transmission 4x2 propulsion.',
                 'highlights' => ['Moteur 1,5 L essence', 'Boîte manuelle', '4x2 propulsion', 'Garantie 3 ans / 100 000 km'],
                 'specs' => ['Motorisation' => ['Version' => 'Mini van essence BVM', 'Motorisation' => '1,5 L essence', 'Boîte' => 'Manuelle', 'Transmission' => '4x2 propulsion'], 'Garantie' => ['Garantie constructeur' => 'Proposition : 3 ans / 100 000 km']],
                 'image' => 'mycars/djembe/djembfour.png', 'hero_image' => 'mycars/djembe/djembfour.png',
