@@ -248,6 +248,11 @@
     font-size: 12px;
     color: var(--on-stage-muted);
 }
+.kp-site-footer__account {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
 
 /* Accueil */
 .kp-home-hero {

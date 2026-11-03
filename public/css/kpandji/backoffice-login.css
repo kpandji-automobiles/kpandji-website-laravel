@@ -1,0 +1,79 @@
+/* Page de connexion du backoffice (/backoffice/login) : habillage KPANDJI par-dessus Filament.
+   Chargée par AdminPanelProvider sur cette seule page. Couleurs : tokens.css (stage, gold, gold-ink). */
+.fi-simple-layout {
+    background: #050505 center / cover no-repeat;
+    background-image: linear-gradient(rgba(5, 5, 5, 0.7), rgba(5, 5, 5, 0.9)), url("../../images/cars/lathaye-hero.jpg");
+}
+
+.fi-simple-main {
+    border-top: 3px solid #c9a962;
+    border-radius: 2px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+.kp-bo-login__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.kp-bo-login__brand img {
+    width: 56px;
+    height: auto;
+}
+
+.kp-bo-login__brand span {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-align: center;
+}
+
+.kp-bo-login__brand small {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: #7a5c1e;
+}
+
+.dark .kp-bo-login__brand small {
+    color: #d9c08a;
+}
+
+.kp-bo-login__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(139, 135, 127, 0.35);
+    font-size: 13px;
+}
+
+.kp-bo-login__links span {
+    display: flex;
+    gap: 16px;
+}
+
+.kp-bo-login__links a {
+    color: inherit;
+    opacity: 0.75;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.kp-bo-login__links a:hover,
+.kp-bo-login__links a:focus-visible {
+    opacity: 1;
+    color: #7a5c1e;
+}
+
+.dark .kp-bo-login__links a:hover,
+.dark .kp-bo-login__links a:focus-visible {
+    color: #d9c08a;
+}
