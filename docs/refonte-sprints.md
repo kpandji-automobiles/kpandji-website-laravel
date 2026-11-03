@@ -45,7 +45,7 @@ Branche : `refonte` (PR vers `main` en fin de refonte). Une fonctionnalité term
 | # | Fonctionnalité |
 |---|---|
 | 3.1 | ✅ Accès managers + admins, validation / refus des comptes |
-| 3.2 | Clients : fiche, investissements et écritures de gains (relation managers) |
+| 3.2 | ✅ Clients : fiche, investissements et écritures de gains (relation managers) |
 | 3.3 | Invitations : envoyer, renvoyer (limité), révoquer |
 | 3.4 | Boîte de réception unifiée et conversations (réponse par e-mail) |
 
