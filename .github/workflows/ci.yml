@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, intl, pdo_sqlite, zip, bcmath, gd
+          tools: composer:v2
+          coverage: none
+
+      - name: Dépendances Composer
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Environnement
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+
+      - name: Tests
+        run: php artisan test
+
+  pint:
+    # Informatif : le code existant n'est pas encore formaté, on ne vérifie que les fichiers modifiés par la PR.
+    name: Pint (fichiers modifiés)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - run: composer install --prefer-dist --no-interaction --no-progress
+
+      - run: vendor/bin/pint --test --diff="origin/${{ github.base_ref }}"

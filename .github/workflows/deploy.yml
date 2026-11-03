@@ -1,0 +1,74 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Un seul déploiement à la fois ; un merge pendant un déploiement attend son tour.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Déploiement cPanel
+    needs: ci
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+    env:
+      DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+      APP_URL: ${{ vars.APP_URL }}
+      DEPLOY_HOOK_TOKEN: ${{ secrets.DEPLOY_HOOK_TOKEN }}
+      # Le site tourne en PHP 8.4 via le sélecteur CloudLinux (le MultiPHP du compte est en 8.2).
+      PHP_HANDLER: AddHandler application/x-httpd-alt-php84___lsphp .php .php8 .phtml
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, intl, zip, bcmath, gd
+          tools: composer:v2
+          coverage: none
+
+      - name: Accès SFTP
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 600 /dev/null "$RUNNER_TEMP/deploy_key"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/deploy_key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/known_hosts"
+          echo "DEPLOY_KEY_FILE=$RUNNER_TEMP/deploy_key" >> "$GITHUB_ENV"
+          echo "DEPLOY_KNOWN_HOSTS_FILE=$RUNNER_TEMP/known_hosts" >> "$GITHUB_ENV"
+          cp .github/scripts/deploy.sh "$RUNNER_TEMP/deploy.sh"
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Build de la release
+        run: |
+          composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+          RELEASE="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+          echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
+          echo "$RELEASE" > RELEASE
+          printf '\n%s\n' "$PHP_HANDLER" >> public/.htaccess
+          # storage et .env viennent de shared/ sur le serveur.
+          rm -rf .git .github tests node_modules storage .env
+
+      - name: Déploiement
+        id: deploy
+        run: bash "$RUNNER_TEMP/deploy.sh" deploy
+
+      - name: Retour à la release précédente
+        if: failure() && steps.deploy.outcome == 'failure'
+        run: bash "$RUNNER_TEMP/deploy.sh" rollback
