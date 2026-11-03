@@ -18,14 +18,14 @@ Branche : `refonte` (PR vers `main` en fin de refonte). Une fonctionnalité term
 
 | # | Fonctionnalité | Statut |
 |---|---|---|
-| 0.1 | Filament 5 installé, panneau `/backoffice`, accès réservé aux admins, thème KPANDJI | |
-| 0.2 | Tokens et composants du design system dans `public/css/kpandji/` + layout Blade de base | |
+| 0.1 | Filament 5 installé, panneau `/backoffice`, accès réservé aux admins, thème KPANDJI | ✅ `49f41c3` |
+| 0.2 | Tokens et composants du design system dans `public/css/kpandji/` + layout Blade de base | ✅ `acc2213` |
 
 ## Sprint 1 — Back-office : catalogue et contenus
 
 | # | Fonctionnalité | Remplace |
 |---|---|---|
-| 1.1 | Ressource **Voitures** (CRUD, image, brochure, visibilité, ordre glisser-déposer) | `Admin\CarController` |
+| 1.1 | ✅ `e971478` Ressource **Voitures** (CRUD, image, brochure, visibilité, ordre glisser-déposer) | `Admin\CarController` |
 | 1.2 | Ressource **Modèles** accueil + showroom (FR/EN, médias, galerie) | `Admin\ModeleController`, `ShowroomController` |
 | 1.3 | Ressource **Pages libres** (HTML filtré, SEO, menu) | `Admin\PageController` |
 | 1.4 | Page **Promotion** (titre, réduction, date de fin) | `DashboardController@promo` |
