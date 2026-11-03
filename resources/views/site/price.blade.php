@@ -10,6 +10,9 @@
     <span class="kp-price__label">{{ $car->hasVersions() ? content('price.promo_ttc_from') : content('price.promo_ttc') }}</span>
     <span class="kp-price__value">{{ \App\Models\Car::fcfa((int) $car->promo_price) }}</span>
     @if($car->campaign_price)<span class="kp-price__legal">{{ content('price.pack') }} {{ \App\Models\Car::fcfa((int) $car->campaign_price) }}</span>@endif
+  @elseif($car->versionPrices()->isNotEmpty())
+    <span class="kp-price__label">{{ $car->hasPriceRange() ? content('price.promo_ttc_from') : content('price.promo_ttc') }}</span>
+    <span class="kp-price__value">{{ \App\Models\Car::fcfa($car->startingPrice()) }}</span>
   @elseif($car->price)
     <span class="kp-price__label">{{ content('price.from') }}</span>
     <span class="kp-price__value">{{ \App\Models\Car::fcfa((int) $car->price) }}</span>

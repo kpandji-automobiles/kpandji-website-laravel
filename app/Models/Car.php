@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\PublicUpload;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class Car extends Model
 {
@@ -58,6 +59,40 @@ class Car extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Prix promo des versions renseignées.
+     *
+     * @return Collection<int, int>
+     */
+    public function versionPrices(): Collection
+    {
+        return collect($this->versions ?? [])->pluck('promo_price')->filter()->map(fn ($price) => (int) $price)->values();
+    }
+
+    /** Prix Kpandji affiché : prix promo du modèle, sinon la version la moins chère, sinon le prix catalogue (remise globale comprise). */
+    public function startingPrice(): ?int
+    {
+        if ($this->promo_price) {
+            return (int) $this->promo_price;
+        }
+
+        return $this->versionPrices()->min() ?? $this->discountedPrice() ?? ($this->price ? (int) $this->price : null);
+    }
+
+    /** Plusieurs versions à des prix différents : le prix s'affiche « à partir de ». */
+    public function hasPriceRange(): bool
+    {
+        return ! $this->promo_price && $this->versionPrices()->unique()->count() > 1;
+    }
+
+    /** Texte libre du modèle (catégorie, description, points forts, versions) pour en déduire énergie et boîte. */
+    public function searchableText(): string
+    {
+        $versions = collect($this->versions ?? [])->flatMap(fn ($version) => [$version['version'] ?? '', $version['motorisation'] ?? '', $version['boite'] ?? '']);
+
+        return implode(' ', array_filter([$this->name, $this->category, $this->description, ...($this->highlights ?? []), ...$versions->all()]));
     }
 
     public static function fcfa(?int $v): string

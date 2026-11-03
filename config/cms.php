@@ -147,6 +147,13 @@ return [
             ['label' => 'Kpandji Privilège', 'url' => '/privilege'],
             ['label' => 'Opportunités', 'url' => '/opportunities'],
         ], ['label' => 'Libellé', 'url' => 'Lien']],
+        // Catalogue /modeles refondu (design system).
+        'catalog.eyebrow' => ['modeles', 'text', 'Catalogue — surtitre', 'La gamme KPANDJI'],
+        'catalog.title' => ['modeles', 'text', 'Catalogue — titre', 'Nos modèles'],
+        'catalog.intro' => ['modeles', 'textarea', 'Catalogue — introduction (vide = masquée)', ''],
+        'catalog.search_placeholder' => ['modeles', 'text', 'Catalogue — champ de recherche', 'Rechercher un modèle : DJETRAN, LATHAYE…'],
+        'catalog.legal' => ['modeles', 'text', 'Catalogue — mention à côté du nombre de modèles', 'prix TTC conseillés'],
+        'catalog.empty' => ['modeles', 'text', 'Catalogue — aucun résultat', 'Aucun modèle ne correspond à ces critères.'],
         'showroom.page_title' => ['home', 'text', 'ShowRoom — titre de l\'onglet', 'Nos modèles'],
         'showroom.badge' => ['home', 'text', 'ShowRoom — badge', 'Promotion exceptionnelle'],
         'showroom.title' => ['home', 'text', 'ShowRoom — titre', 'Le ShowRoom KPANDJI'],

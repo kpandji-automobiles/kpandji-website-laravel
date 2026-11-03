@@ -13,7 +13,7 @@
   $bannerWhatsapp = preg_replace('/\D/', '', (string) content('home.banner_wa_number'));
   $cards = collect(content('home.cards'))->filter(fn ($card) => trim($card['title'] ?? '') !== '')->values();
   $offerCategories = $cars->pluck('category')->filter()->unique()->values();
-  $budgetModels = $cars->map(fn ($car) => ['name' => $car->name, 'price' => $car->discountedPrice() ?? $car->price])->filter(fn ($model) => $model['price'])->values();
+  $budgetModels = $cars->map(fn ($car) => ['name' => $car->name, 'price' => $car->startingPrice()])->filter(fn ($model) => $model['price'])->values();
 @endphp
 
 @section('content')
@@ -120,7 +120,7 @@
 </section>
 @endif
 
-<section class="kp-wrap kp-section kp-home-budget" aria-labelledby="kp-budget-title" data-kp-budget
+<section class="kp-wrap kp-section kp-home-budget" id="budget" aria-labelledby="kp-budget-title" data-kp-budget
   x-data="{ apport: '3 000 000', monthly: '450 000', months: 60, models: @js($budgetModels),
     num(value) { return parseInt(String(value).replace(/\D/g, ''), 10) || 0 },
     get budget() { return this.num(this.apport) + this.num(this.monthly) * this.months },

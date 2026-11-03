@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\Modele;
 use App\Models\TestDriveRequest;
+use App\Support\Catalogue;
 use Illuminate\Http\Request;
 
 class SiteController extends Controller
@@ -17,9 +18,12 @@ class SiteController extends Controller
         return view('home', ['cars' => $cars, 'types' => $cars->filter(fn (Car $car) => filled($car->category))->unique('category')->values()]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return view('cars.index', ['cars' => Car::visible()->get()]);
+        $range = Car::visible()->get();
+        $filters = Catalogue::filtersFrom($request, $range);
+
+        return view('cars.index', ['range' => $range, 'cars' => Catalogue::apply($range, $filters), 'filters' => $filters]);
     }
 
     public function opportunities()
