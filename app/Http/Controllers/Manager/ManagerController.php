@@ -10,12 +10,13 @@ use App\Models\Investment;
 use App\Models\RevenueEntry;
 use App\Models\User;
 use App\Support\AccountValidation;
+use App\Support\DirectMessages;
 use App\Support\Inbox;
+use App\Support\InboxReplies;
 use App\Support\Invitations;
 use App\Support\SpaceMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /** Espace manager (/espace-manager) — accessible au rôle manager et à l'admin. */
@@ -111,12 +112,6 @@ class ManagerController extends Controller
     }
 
     // ---------- Messages ----------
-    /** Destinataires possibles : comptes validés client/manager (hors expéditeur). */
-    private function recipients(Request $r)
-    {
-        return User::whereIn('role', ['client', 'manager'])->where('account_status', 'active')->where('id', '!=', $r->user()->id)->orderBy('name')->get(['id', 'name', 'email', 'role']);
-    }
-
     public function inbox(Request $r, string $tab = 'messages')
     {
         $box = $tab === 'messages' ? $r->input('box') : null;
@@ -165,8 +160,8 @@ class ManagerController extends Controller
                 'counts' => collect(),
                 'sources' => ['contact'],
                 'statuses' => Inbox::STATUSES,
-                'recipients' => $this->recipients($r),
-                'boxCounts' => $this->boxCounts($me),
+                'recipients' => DirectMessages::recipients($r->user()),
+                'boxCounts' => DirectMessages::boxCounts($me),
             ]);
         }
         $src = Inbox::TABS[$tab] ?? abort(404);
@@ -202,10 +197,10 @@ class ManagerController extends Controller
             'sources' => $src,
             'box' => null,
             'recipients' => $tab === 'messages'
-                ? $this->recipients($r)
+                ? DirectMessages::recipients($r->user())
                 : collect(),
             'boxCounts' => $tab === 'messages'
-                ? $this->boxCounts($r->user())
+                ? DirectMessages::boxCounts($r->user())
                 : [],
             'statuses' => $statuses,
         ]);
@@ -231,60 +226,15 @@ class ManagerController extends Controller
     public function reply(Request $r, string $source, int $id)
     {
         $m = Inbox::find($source, $id) ?? abort(404);
-        $body = $r->validate(['body' => 'required|string|max:5000'])['body'];
-        $status = $m['email'] ? SpaceMail::send($m['email'], sp_t('reply_subject').($m['subject'] && $m['subject'] !== '—' ? ' — '.$m['subject'] : ''), $body) : null;
-        InboxReply::create(['source' => $source, 'source_id' => $id, 'user_id' => $r->user()->id, 'to_email' => $m['email'], 'body' => $body, 'mail_status' => $status]);
-        if ($m['status'] === 'nouveau' && $source !== 'essai') {
-            Inbox::setStatus($source, $id, 'en_cours');
-        }
+        InboxReplies::send($m, $r->user(), $r->validate(['body' => 'required|string|max:5000'])['body']);
 
         return back()->with('ok', sp_t('reply_done'));
-    }
-
-    /** Compteurs des boîtes calculés en base. */
-    private function boxCounts(User $me): array
-    {
-        $userId = (int) $me->id;
-        $counts = [];
-
-        foreach ([
-            'sent' => 'sender_id',
-            'received' => 'recipient_id',
-        ] as $box => $column) {
-            $conversations = Conversation::query()
-                ->where($column, $userId);
-
-            $counts[$box] = (int) (clone $conversations)->count();
-
-            // Messages initiaux reçus et non lus.
-            $initialUnread = (clone $conversations)
-                ->where('recipient_id', $userId)
-                ->whereNull('read_at')
-                ->count();
-
-            // Réponses non lues dans les conversations de la boîte.
-            $replyUnread = InboxReply::query()
-                ->where('source', 'dm')
-                ->whereIn(
-                    'source_id',
-                    (clone $conversations)->select('id')
-                )
-                ->where('user_id', '!=', $userId)
-                ->whereNull('read_at')
-                ->count();
-
-            $counts[$box.'_unread'] = (int) (
-                $initialUnread + $replyUnread
-            );
-        }
-
-        return $counts;
     }
 
     // ---------- Messages directs (manager -> utilisateurs) ----------
     public function compose(Request $r)
     {
-        $allowed = $this->recipients($r)->pluck('id')->all();
+        $allowed = DirectMessages::recipients($r->user())->pluck('id')->all();
         $d = $r->validate([
             'recipients' => 'required|array|min:1|max:500',
             'recipients.*' => ['integer', Rule::in($allowed)],
@@ -297,17 +247,10 @@ class ManagerController extends Controller
             'subject.required' => sp_t('dm_e_subject'),
             'body.required' => sp_t('dm_e_body'),
         ]);
-        $batch = (string) Str::uuid();
-        $users = User::whereIn('id', array_unique($d['recipients']))->get();
-        foreach ($users as $u) {
-            // Une conversation séparée par destinataire : personne ne voit les autres destinataires
-            $c = Conversation::create(['sender_id' => $r->user()->id, 'recipient_id' => $u->id, 'subject' => $d['subject'], 'body' => $d['body'], 'batch' => $batch]);
-            $link = $u->role === 'client' ? route('client.thread', 'dm-'.$c->id) : route('manager.conversation', $c);
-            $c->forceFill(['mail_status' => SpaceMail::send($u->email, $d['subject'], $d['body']."\n\n— ".$r->user()->name.", KPANDJI\n".$link)])->save();
-        }
-        $msg = str_replace(':n', (string) $users->count(), sp_t('dm_sent_ok'));
+        $count = DirectMessages::compose($r->user(), array_unique($d['recipients']), $d['subject'], $d['body']);
+        $msg = str_replace(':n', (string) $count, sp_t('dm_sent_ok'));
 
-        return $r->expectsJson() ? response()->json(['ok' => true, 'count' => $users->count(), 'message' => $msg, 'redirect' => route('manager.inbox', ['box' => 'sent'])])
+        return $r->expectsJson() ? response()->json(['ok' => true, 'count' => $count, 'message' => $msg, 'redirect' => route('manager.inbox', ['box' => 'sent'])])
             : redirect()->route('manager.inbox', ['box' => 'sent'])->with('ok', $msg);
     }
 
@@ -322,10 +265,7 @@ class ManagerController extends Controller
     public function conversationReply(Request $r, Conversation $conversation)
     {
         abort_unless($conversation->involves($r->user()), 403);
-        $body = $r->validate(['body' => 'required|string|max:5000'])['body'];
-        $other = $conversation->sender_id === $r->user()->id ? $conversation->recipient : $conversation->sender;
-        $status = $other ? SpaceMail::send($other->email, sp_t('reply_subject').' — '.$conversation->subject, $body) : null;
-        InboxReply::create(['source' => 'dm', 'source_id' => $conversation->id, 'user_id' => $r->user()->id, 'to_email' => $other?->email, 'body' => $body, 'mail_status' => $status]);
+        DirectMessages::reply($conversation, $r->user(), $r->validate(['body' => 'required|string|max:5000'])['body']);
 
         return back()->with('ok', sp_t('reply_done'));
     }
