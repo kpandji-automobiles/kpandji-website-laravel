@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +14,7 @@ use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'password', 'role', 'phone', 'account_status'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -24,20 +26,54 @@ class User extends Authenticatable
      */
     public const ROLES = ['admin', 'manager', 'client', 'user'];
 
-    public function isAdmin(): bool { return (bool) $this->is_admin || $this->role === 'admin'; }
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin || $this->role === 'admin';
+    }
+
+    /** Back-office Filament : réservé aux administrateurs. */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->isAdmin();
+    }
+
     /** Manager OU admin (l'admin a accès à tout l'espace manager). */
-    public function isActive(): bool { return $this->isAdmin() || ($this->account_status ?? 'active') === 'active'; }
-    public function isManager(): bool { return $this->isAdmin() || ($this->role === 'manager' && $this->isActive()); }
-    public function isClient(): bool { return ! $this->isAdmin() && $this->role === 'client' && $this->isActive(); }
-    public function investments() { return $this->hasMany(Investment::class)->orderByDesc('start_date')->orderByDesc('id'); }
+    public function isActive(): bool
+    {
+        return $this->isAdmin() || ($this->account_status ?? 'active') === 'active';
+    }
+
+    public function isManager(): bool
+    {
+        return $this->isAdmin() || ($this->role === 'manager' && $this->isActive());
+    }
+
+    public function isClient(): bool
+    {
+        return ! $this->isAdmin() && $this->role === 'client' && $this->isActive();
+    }
+
+    public function investments()
+    {
+        return $this->hasMany(Investment::class)->orderByDesc('start_date')->orderByDesc('id');
+    }
 
     /** Espace de destination après connexion (null = simple compte). */
     public function workspaceUrl(): ?string
     {
-        if ($this->isAdmin()) return route('admin.dashboard');
-        if (in_array($this->role, ['manager', 'client'], true) && ! $this->isActive()) return route('space.waiting');
-        if ($this->role === 'manager') return route('manager.dashboard');
-        if ($this->role === 'client') return route('client.dashboard');
+        if ($this->isAdmin()) {
+            return route('admin.dashboard');
+        }
+        if (in_array($this->role, ['manager', 'client'], true) && ! $this->isActive()) {
+            return route('space.waiting');
+        }
+        if ($this->role === 'manager') {
+            return route('manager.dashboard');
+        }
+        if ($this->role === 'client') {
+            return route('client.dashboard');
+        }
+
         return null;
     }
 

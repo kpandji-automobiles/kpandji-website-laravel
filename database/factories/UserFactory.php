@@ -42,4 +42,28 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Administrateur du back-office.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => 'admin']);
+    }
+
+    /**
+     * Manager actif de l'espace manager.
+     */
+    public function manager(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => 'manager', 'account_status' => 'active']);
+    }
+
+    /**
+     * Client (investisseur) actif.
+     */
+    public function client(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => 'client', 'account_status' => 'active']);
+    }
 }
