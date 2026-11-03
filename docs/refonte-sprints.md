@@ -35,10 +35,10 @@ Branche : `refonte` (PR vers `main` en fin de refonte). Une fonctionnalité term
 
 | # | Fonctionnalité |
 |---|---|
-| 2.1 | Demandes d'essai et de contact (filtres, marquer traité, supprimer) |
-| 2.2 | Demandes SAV, inscriptions SIRA, demandes Privilège |
-| 2.3 | Candidatures (fiche, téléchargement sécurisé du CV) |
-| 2.4 | Tableau de bord : chiffres clés et dernières demandes |
+| 2.1 | ✅ `d9c1adc` Demandes d'essai et de contact (filtres, marquer traité, supprimer) |
+| 2.2 | ✅ `b6843b0` Demandes SAV, inscriptions SIRA, demandes Privilège |
+| 2.3 | ✅ `3b94fb8` Candidatures (fiche, téléchargement sécurisé du CV) |
+| 2.4 | ✅ `bd42c18` Tableau de bord : chiffres clés et dernières demandes |
 
 ## Sprint 3 — Espace manager (panneau Filament `/espace-manager`)
 
