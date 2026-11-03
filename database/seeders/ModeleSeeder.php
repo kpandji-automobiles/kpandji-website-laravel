@@ -31,21 +31,24 @@ class ModeleSeeder extends Seeder
         $rows = json_decode(file_get_contents(__DIR__.'/data/modeles.json'), true);
         foreach ($rows as $i => $m) {
             $row = Modele::firstOrNew(['key' => $m['id']]);
-            if ($row->exists) continue;
             $p = fn ($v) => ltrim((string) $v, '/');
-            $row->fill([
-                'name' => $m['name'],
-                'car_slug' => self::CAR[$m['id']] ?? null,
-                'description_fr' => $m['description']['fr'] ?? null,
-                'description_en' => $m['description']['en'] ?? null,
-                'characteristics' => array_map(fn ($c) => ['fr' => $c['fr'] ?? '', 'en' => $c['en'] ?? ''], $m['characteristics'] ?? []),
-                'top_image' => $p($m['media']['topImage']),
-                'top_video' => $p($m['media']['topVideo']),
-                'bottom_left_image' => $p($m['media']['bottomLeftImage']),
-                'bottom_right_image' => $p($m['media']['bottomRightImage']),
-                'sort' => $i,
-                'is_active' => true,
-            ])->save();
+            // Showroom may already have created the row with is_active=false; still fill accueil media.
+            if (! $row->description_fr) {
+                $row->fill([
+                    'name' => $row->name ?: $m['name'],
+                    'car_slug' => $row->car_slug ?: (self::CAR[$m['id']] ?? null),
+                    'description_fr' => $m['description']['fr'] ?? null,
+                    'description_en' => $m['description']['en'] ?? null,
+                    'characteristics' => array_map(fn ($c) => ['fr' => $c['fr'] ?? '', 'en' => $c['en'] ?? ''], $m['characteristics'] ?? []),
+                    'top_image' => $row->top_image ?: $p($m['media']['topImage']),
+                    'top_video' => $row->top_video ?: $p($m['media']['topVideo']),
+                    'bottom_left_image' => $row->bottom_left_image ?: $p($m['media']['bottomLeftImage']),
+                    'bottom_right_image' => $row->bottom_right_image ?: $p($m['media']['bottomRightImage']),
+                    'sort' => $row->sort ?: $i,
+                ]);
+            }
+            $row->is_active = true;
+            $row->save();
         }
 
         $photos = [
