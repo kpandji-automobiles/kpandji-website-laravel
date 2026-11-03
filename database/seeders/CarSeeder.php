@@ -23,7 +23,7 @@ class CarSeeder extends Seeder
                     'Habitacle' => ['Largeur banquette avant' => '1 660 mm', 'Largeur banquette arrière' => '1 650 mm', 'Volume habitacle' => '4,3 m³'],
                     'Sécurité & aides' => ['Aide à la conduite' => 'Niveau 2 : ACC, LDWS, FCW, vision 360°', 'Airbags' => 'Frontaux et latéraux', 'Autres' => 'Frein de stationnement électronique, TPMS, PEPS, commande vocale'],
                 ],
-                'image' => 'images/cars/djetran-plus.png', 'hero_image' => 'images/cars/djetran-plus-hero.jpg',
+                'image' => 'mycars/djetps/djetps.png', 'hero_image' => 'mycars/djetps/djetps.png',
             ],
             [
                 'slug' => 'djetran', 'name' => 'DJETRAN', 'category' => 'Pick-up 4x4',
@@ -33,7 +33,7 @@ class CarSeeder extends Seeder
                     'Motorisation' => ['Moteur' => 'Turbo Diesel et essence 2.3 L', 'Puissance' => '163 ch', 'Couple' => '340 Nm', 'Transmission' => 'Intégrale'],
                     'Sécurité' => ['Freinage' => 'ABS + EBD', 'Stabilité' => 'Contrôle électronique de stabilité', 'Caméra' => '360°'],
                 ],
-                'image' => 'images/cars/djetran.png', 'hero_image' => 'images/cars/djetran-hero.jpg',
+                'image' => 'mycars/djet/djet1.png', 'hero_image' => 'mycars/djet/djet1.png',
             ],
             [
                 'slug' => 'lathaye', 'name' => 'LATHAYE', 'category' => 'SUV',
@@ -42,7 +42,7 @@ class CarSeeder extends Seeder
                 'specs' => [
                     'Motorisation' => ['Moteur' => '2.0T GDI Turbo', 'Puissance maximale' => '165 kW', 'Transmission' => 'Automatique CVT 8 rapports', 'Vitesse maximale' => '210 km/h'],
                 ],
-                'image' => 'images/cars/lathaye.png', 'hero_image' => 'images/cars/lathaye-hero.jpg',
+                'image' => 'mycars/lath/lath.png', 'hero_image' => 'mycars/lath/lath.png',
             ],
             [
                 'slug' => 'banco-bva', 'name' => 'BANCO BVA', 'category' => 'Citadine',
@@ -79,7 +79,7 @@ class CarSeeder extends Seeder
                 'description' => "SUV polyvalent pour les déplacements du quotidien : moteur 1,5 L essence, boîte CVT, transmission 4x2.",
                 'highlights' => ['Moteur 1,5 L essence', 'Boîte automatique CVT', 'Transmission 4x2', 'Garantie 3 ans / 100 000 km'],
                 'specs' => ['Motorisation' => ['Version' => 'SUV essence CVT', 'Motorisation' => '1,5 L essence', 'Boîte' => 'CVT', 'Transmission' => '4x2'], 'Garantie' => ['Garantie constructeur' => 'Proposition : 3 ans / 100 000 km']],
-                'image' => 'images/cars/souralai.png', 'hero_image' => 'images/cars/souralai.png', 'brochure' => 'fiches/souralai-suv.pdf',
+                'image' => 'mycars/souralay/soural.png', 'hero_image' => 'mycars/souralay/soural.png', 'brochure' => 'fiches/souralai-suv.pdf',
                 'promo_price' => 14900000, 'maintenance_cost' => 1100000, 'campaign_price' => 16000000, 'warranty' => 'Proposition : 3 ans / 100 000 km',
             ],
             [
@@ -87,7 +87,7 @@ class CarSeeder extends Seeder
                 'description' => "Mini van : moteur 1,5 L essence, boîte manuelle, transmission 4x2 propulsion.",
                 'highlights' => ['Moteur 1,5 L essence', 'Boîte manuelle', '4x2 propulsion', 'Garantie 3 ans / 100 000 km'],
                 'specs' => ['Motorisation' => ['Version' => 'Mini van essence BVM', 'Motorisation' => '1,5 L essence', 'Boîte' => 'Manuelle', 'Transmission' => '4x2 propulsion'], 'Garantie' => ['Garantie constructeur' => 'Proposition : 3 ans / 100 000 km']],
-                'image' => 'images/cars/placeholder.svg', 'hero_image' => 'images/cars/placeholder.svg',
+                'image' => 'mycars/djembe/djembfour.png', 'hero_image' => 'mycars/djembe/djembfour.png',
                 'promo_price' => 9700000, 'maintenance_cost' => 1200000, 'campaign_price' => 10900000, 'warranty' => 'Proposition : 3 ans / 100 000 km',
             ],
         ];

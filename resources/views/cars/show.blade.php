@@ -17,7 +17,7 @@
 @php($kf = collect(['/^(moteur|motorisation)$/iu', '/puissance/iu', '/couple/iu', '/(transmission|boîte)/iu', '/vitesse/iu', '/places/iu'])->map(fn ($re) => $flat->first(fn ($r) => preg_match($re, $r['k'])))->filter()->unique('k')->take(4)->values())
 @php($highlights = collect($car->highlights ?? [])->filter()->values())
 @php($gallery = collect($m?->gallery ?? [])->filter(fn ($g) => filled($g['src'] ?? null) && file_exists(public_path($g['src'])))->map(fn ($g) => ['src' => asset($g['src']), 'alt' => ($g['alt'] ?? '') ?: $car->name, 'tag' => $g['tag'] ?? 'ext']))
-@php($extra = collect([$m?->top_image, $m?->bottom_left_image, $m?->bottom_right_image])->filter(fn ($s) => $s && file_exists(public_path($s)))->map(fn ($s) => ['src' => asset($s), 'alt' => $car->name, 'tag' => 'ext']))
+@php($extra = collect([$car->image, $car->hero_image, $m?->top_image, $m?->bottom_left_image, $m?->bottom_right_image])->filter(fn ($s) => $s && file_exists(public_path($s)))->map(fn ($s) => ['src' => asset($s), 'alt' => $car->name, 'tag' => 'ext']))
 @php($gallery = $gallery->concat($extra)->unique('src')->values())
 @php($video = $m?->top_video && file_exists(public_path($m->top_video)) ? asset($m->top_video) : null)
 @php($fmt = fn ($v) => \App\Models\Car::fcfa($v ? (int) $v : null))

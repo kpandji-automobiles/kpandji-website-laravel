@@ -47,5 +47,53 @@ class ModeleSeeder extends Seeder
                 'is_active' => true,
             ])->save();
         }
+
+        $photos = [
+            'djetran-plus' => [
+                'mycars/djetps/djetps.png',
+                'mycars/djetps/djetps1.png',
+                'mycars/djetps/djetps2.png',
+                'mycars/djetps/djetps3.png',
+                'mycars/djetps/djetps4.png',
+            ],
+            'djetran' => [
+                'mycars/djet/djet1.png',
+                'mycars/djet/Djet.png',
+                'mycars/djet/djetall1.png',
+                'mycars/djet/djetall2.png',
+                'mycars/djet/djetall3.png',
+                'mycars/djet/djetaut1.jpg',
+                'mycars/djet/DjetIntAuto.png',
+                'mycars/djet/DjetInt2.png',
+                'mycars/djet/DjetInt6.png',
+            ],
+            'lathaye' => ['mycars/lath/lath.png'],
+            'souralai' => ['mycars/souralay/soural.png'],
+            'gemba' => [
+                'mycars/djembe/djembfour.png',
+                'mycars/djembe/djembvan.png',
+                'mycars/djembe/djemtrans.png',
+            ],
+        ];
+
+        foreach ($photos as $slug => $files) {
+            $files = array_values(array_filter($files, fn ($src) => is_file(public_path($src))));
+            if ($files === []) {
+                continue;
+            }
+
+            $gallery = array_map(fn ($src) => [
+                'src' => $src,
+                'alt' => '',
+                'tag' => str_contains(strtolower($src), 'int') ? 'int' : 'ext',
+            ], $files);
+
+            Modele::query()->where('car_slug', $slug)->get()->each(function (Modele $row) use ($files, $gallery) {
+                $row->forceFill([
+                    'top_image' => $files[0],
+                    'gallery' => $gallery,
+                ])->save();
+            });
+        }
     }
 }
