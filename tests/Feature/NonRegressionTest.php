@@ -20,7 +20,7 @@ class NonRegressionTest extends TestCase
     public static function pages(): array
     {
         $public = ['/', '/modeles', '/showroom', '/opportunities', '/kpandji-automobiles', '/ecologie', '/essai', '/demande-essai', '/contact', '/sav', '/sira', '/privilege', '/emplois', '/connexion'];
-        $admin = ['/backoffice', '/backoffice/cars', '/backoffice/cars/create', '/backoffice/contenus', '/backoffice/job-applications', '/backoffice/modeles', '/backoffice/modeles/create', '/backoffice/pages', '/backoffice/pages/create', '/backoffice/privilege-requests', '/backoffice/promotion', '/backoffice/sav-requests', '/backoffice/sira-requests', '/backoffice/test-drive-requests'];
+        $admin = ['/backoffice', '/backoffice/cars', '/backoffice/cars/create', '/backoffice/contenus', '/backoffice/job-applications', '/backoffice/modeles', '/backoffice/modeles/create', '/backoffice/pages', '/backoffice/pages/create', '/backoffice/privilege-requests', '/backoffice/promotion', '/backoffice/fenetre-publicitaire', '/backoffice/sav-requests', '/backoffice/sira-requests', '/backoffice/test-drive-requests'];
         $manager = ['/manager', '/manager/boite/autres', '/manager/boite/contacts', '/manager/boite/reservations', '/manager/boite/sav', '/manager/clients', '/manager/comptes', '/manager/conversations', '/manager/investissements', '/manager/investissements/create', '/manager/invitations'];
         $client = ['/mon-espace', '/mon-espace/gains', '/mon-espace/gains.csv', '/mon-espace/messages', '/mon-espace/opportunites', '/mon-compte/mot-de-passe'];
 

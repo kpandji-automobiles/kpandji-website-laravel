@@ -36,6 +36,7 @@
 @else
 @include('site.footer')
 @endif
+@include('site.ad-popup')
 @stack('scripts')
 </body>
 </html>
