@@ -19,6 +19,7 @@ class DeployController extends Controller
      */
     private const COMMANDS = [
         'migrate' => ['--force' => true],
+        'db:seed' => ['--force' => true],
         'storage:link' => [],
         'optimize' => [],
     ];

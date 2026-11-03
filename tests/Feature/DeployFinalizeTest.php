@@ -57,6 +57,7 @@ class DeployFinalizeTest extends TestCase
     public function test_it_runs_the_post_deploy_commands(): void
     {
         Artisan::shouldReceive('call')->once()->with('migrate', ['--force' => true])->andReturn(0)->ordered();
+        Artisan::shouldReceive('call')->once()->with('db:seed', ['--force' => true])->andReturn(0)->ordered();
         Artisan::shouldReceive('call')->once()->with('storage:link', [])->andReturn(0)->ordered();
         Artisan::shouldReceive('call')->once()->with('optimize', [])->andReturn(0)->ordered();
         Artisan::shouldReceive('output')->andReturn('done');
@@ -69,7 +70,7 @@ class DeployFinalizeTest extends TestCase
     public function test_it_stops_at_the_first_failing_command(): void
     {
         Artisan::shouldReceive('call')->once()->with('migrate', ['--force' => true])->andReturn(1);
-        Artisan::shouldReceive('call')->with('storage:link', [])->never();
+        Artisan::shouldReceive('call')->with('db:seed', ['--force' => true])->never();
         Artisan::shouldReceive('output')->andReturn('SQLSTATE error');
 
         $this->withToken(self::TOKEN)->postJson(route('deploy.finalize'), ['release' => self::RELEASE])

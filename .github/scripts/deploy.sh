@@ -4,7 +4,7 @@
 #      sont liés en dur au lieu d'être renvoyés (médias de public/ : ~200 Mo)
 #   2. liens storage et .env vers shared/
 #   3. bascule atomique du lien current
-#   4. finalisation (migrate, storage:link, optimize) via POST /_deploy/finalize
+#   4. finalisation (migrate --force, db:seed --force, storage:link, optimize) via POST /_deploy/finalize
 #   5. health-check, puis nettoyage des anciennes releases
 #
 # Usage : deploy.sh deploy | deploy.sh rollback
@@ -128,7 +128,7 @@ ln -s $DEPLOY_PATH/shared/.env releases/$RELEASE/.env
 EOF
     point_current_to "$RELEASE"
 
-    echo "Finalisation (migrate, storage:link, optimize)…"
+    echo "Finalisation (migrate --force, db:seed --force, storage:link, optimize)…"
     finalize
 
     echo "Health-check $APP_URL/up et page d'accueil…"
