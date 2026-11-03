@@ -23,7 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['admin' => EnsureAdmin::class, 'role' => EnsureRole::class]);
-        $middleware->redirectGuestsTo('/admin/login');
+        // Invités : l'ancien admin garde sa page de connexion, les clients et managers vont sur /connexion.
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*') ? '/admin/login' : '/connexion');
         // Vérifie la cohérence des sessions authentifiées.
         $middleware->authenticateSessions();
     })

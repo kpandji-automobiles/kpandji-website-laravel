@@ -46,6 +46,7 @@ use App\Http\Controllers\Admin\CarController as AdminCars;
 use App\Http\Controllers\Admin\DashboardController as AdminDash;
 use App\Http\Controllers\Admin\ModeleController as AdminModeles;
 use App\Http\Controllers\Admin\ShowroomController as AdminShowroom;
+Route::get('/connexion', [\App\Http\Controllers\AccountAuthController::class, 'show'])->name('connexion');
 Route::post('/connexion', [\App\Http\Controllers\AccountAuthController::class, 'login'])->middleware('throttle:10,1')->name('account.login');
 Route::post('/deconnexion', [\App\Http\Controllers\AccountAuthController::class, 'logout'])->middleware('auth')->name('account.logout');
 Route::get('/admin/login', [AdminAuth::class, 'showLogin'])->name('login');

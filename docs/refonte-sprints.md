@@ -62,7 +62,7 @@ Branche : `refonte` (PR vers `main` en fin de refonte). Une fonctionnalité term
 | # | Fonctionnalité |
 |---|---|
 | 5.1 | ✅ Essai, contact, SAV, SIRA, Privilège, emplois |
-| 5.2 | Connexion, compte en attente, mot de passe |
+| 5.2 | ✅ Connexion, compte en attente, mot de passe |
 | 5.3 | Espace client : tableau de bord, gains, export CSV, messagerie |
 
 ## Sprint 6 — Bascule et nettoyage

@@ -55,7 +55,7 @@
     @auth
       <a href="{{ auth()->user()->workspaceUrl() ?? route('home') }}">Mon espace</a>
     @else
-      <a href="#kp-login" x-data @click.prevent="$dispatch('kp-login')">{{ content('header.account_label') }}</a>
+      <a href="{{ route('connexion') }}" x-data @click.prevent="$dispatch('kp-login')">{{ content('header.account_label') }}</a>
     @endauth
   </div>
 </footer>

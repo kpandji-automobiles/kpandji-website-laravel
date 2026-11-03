@@ -10,7 +10,7 @@
   $tagline = collect([content('header.tagline1'), content('header.tagline2')])->filter()->implode(', ');
   $workspace = auth()->user()?->workspaceUrl();
   $loginError = session('errors')?->getBag('kpLogin')->first('login');
-  $loginOpen = ! auth()->check() && (session('kp_login_open') || $loginError);
+  $loginOpen = ! auth()->check() && ! request()->routeIs('connexion') && (session('kp_login_open') || $loginError);
 @endphp
 <header class="kp-header kp-site-header" x-data="{ menu: false, search: false, login: @js($loginOpen) }" @keydown.escape.window="menu = false; search = false; login = false" @kp-login.window="login = true; menu = false" data-kp-header>
   <div class="kp-header__util">
@@ -33,7 +33,7 @@
       @if($workspace)
         <a class="kp-site-header__nav-account" href="{{ $workspace }}">Mon espace</a>
       @else
-        <a class="kp-site-header__nav-account" href="#kp-login" @click.prevent="login = true; menu = false">{{ content('header.account_label') }}</a>
+        <a class="kp-site-header__nav-account" href="{{ route('connexion') }}" @click.prevent="login = true; menu = false">{{ content('header.account_label') }}</a>
       @endif
     </nav>
     <div class="kp-header__tools">
@@ -44,7 +44,7 @@
         <a class="kp-btn kp-btn--secondary kp-btn--sm kp-site-header__account" href="{{ $workspace }}">Mon espace</a>
         <form method="POST" action="{{ route('account.logout') }}" class="kp-site-header__account">@csrf<button class="kp-btn kp-btn--link kp-site-header__logout">Déconnexion</button></form>
       @else
-        <a class="kp-btn kp-btn--secondary kp-btn--sm kp-site-header__account" href="#kp-login" @click.prevent="login = true; menu = false">{{ content('header.account_label') }}</a>
+        <a class="kp-btn kp-btn--secondary kp-btn--sm kp-site-header__account" href="{{ route('connexion') }}" @click.prevent="login = true; menu = false">{{ content('header.account_label') }}</a>
       @endif
       <a class="kp-btn kp-btn--gold kp-btn--sm kp-site-header__cta" href="{{ cms_url(content('header.cta_url')) }}">{{ content('header.cta_label') }}</a>
       <button type="button" class="kp-btn kp-btn--secondary kp-btn--sm kp-site-header__icon kp-site-header__burger" aria-label="Menu" aria-controls="kp-nav" :aria-expanded="menu" @click="menu = !menu; search = false">

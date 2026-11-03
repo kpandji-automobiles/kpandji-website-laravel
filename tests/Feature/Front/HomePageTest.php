@@ -94,11 +94,9 @@ class HomePageTest extends TestCase
             ->assertSee('value="inconnu@example.test"', false);
     }
 
-    public function test_guest_sent_back_from_a_private_space_sees_the_dialog_open(): void
+    public function test_guest_sent_back_from_a_private_space_lands_on_the_login_page(): void
     {
-        $this->get('/mon-espace')->assertRedirect(route('home'));
-
-        $this->get('/')->assertSee('login: true', false);
+        $this->get('/mon-espace')->assertRedirect(route('connexion'));
     }
 
     public function test_signed_in_client_gets_a_link_to_their_space_instead_of_the_dialog(): void
