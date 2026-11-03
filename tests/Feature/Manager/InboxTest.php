@@ -126,23 +126,6 @@ class InboxTest extends TestCase
         Mail::shouldHaveReceived('raw')->once();
     }
 
-    public function test_replies_share_the_manager_reply_quota_with_the_legacy_space(): void
-    {
-        Mail::spy();
-        $contact = $this->contact();
-
-        for ($attempt = 0; $attempt < 10; $attempt++) {
-            $this->post(route('manager.message.reply', ['source' => 'contact', 'id' => $contact->id]), ['body' => 'Réponse'])->assertRedirect();
-        }
-
-        Livewire::test(ContactRequests::class)
-            ->callAction(TestAction::make('reply')->table('contact-'.$contact->id), ['body' => 'Une de trop'])
-            ->assertNotified('Trop de réponses.');
-
-        $this->assertDatabaseCount('inbox_replies', 10);
-        Mail::shouldHaveReceived('raw')->times(10);
-    }
-
     public function test_opening_a_request_shows_the_message_and_previous_replies(): void
     {
         $contact = $this->contact();

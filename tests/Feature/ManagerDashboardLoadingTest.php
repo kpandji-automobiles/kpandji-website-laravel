@@ -2,22 +2,27 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Manager\Widgets\LatestRequests;
+use App\Filament\Manager\Widgets\ManagerOverview;
 use App\Models\SiraRequest;
 use App\Models\User;
+use Filament\Facades\Filament;
+use Filament\Pages\Dashboard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class ManagerDashboardLoadingTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Tableau de bord sans chargement complet. */
-    public function test_it_loads_only_the_six_latest_requests(): void
+    /** Tableau de bord manager : demandes ouvertes comptées en base, six dernières demandes listées. */
+    public function test_it_counts_open_requests_and_lists_the_six_latest(): void
     {
-        $manager = User::factory()->create(['role' => 'manager']);
+        Filament::setCurrentPanel('manager');
+        $this->actingAs(User::factory()->manager()->create());
         $ids = [];
-        $now = now();
 
         for ($number = 1; $number <= 15; $number++) {
             $request = SiraRequest::create([
@@ -27,67 +32,31 @@ class ManagerDashboardLoadingTest extends TestCase
                 'phone' => '0102030405',
                 'email' => 'client'.$number.'@example.test',
             ]);
-
-            $request->created_at = $now->copy()->subMinutes(15 - $number);
+            $request->created_at = now()->subMinutes(15 - $number);
             $request->save();
-
             $ids[] = (int) $request->id;
 
-            DB::table('inbox_statuses')->insert([
-                'source' => 'sira',
-                'source_id' => $request->id,
-                'status' => $number <= 5 ? 'traite' : 'en_cours',
-            ]);
+            DB::table('inbox_statuses')->insert(['source' => 'sira', 'source_id' => $request->id, 'status' => $number <= 5 ? 'traite' : 'en_cours']);
         }
 
-        DB::flushQueryLog();
-        DB::enableQueryLog();
+        Livewire::test(ManagerOverview::class)->assertSeeInOrder(['Demandes ouvertes', '10']);
 
-        try {
-            $response = $this->actingAs($manager)
-                ->get(route('manager.dashboard'));
+        $latest = array_map(fn (int $id): string => 'sira-'.$id, array_slice(array_reverse($ids), 0, 6));
+        $older = array_map(fn (int $id): string => 'sira-'.$id, array_slice(array_reverse($ids), 6));
 
-            $queries = DB::getQueryLog();
-        } finally {
-            DB::disableQueryLog();
-            DB::flushQueryLog();
-        }
+        Livewire::test(LatestRequests::class)
+            ->assertCanSeeTableRecords($latest, inOrder: true)
+            ->assertCanNotSeeTableRecords($older);
+    }
 
-        $response->assertOk();
-        $response->assertViewHas('open', 10);
+    public function test_manager_dashboard_page_shows_the_widgets(): void
+    {
+        Filament::setCurrentPanel('manager');
+        $this->actingAs(User::factory()->manager()->create());
 
-        $expectedIds = array_slice(array_reverse($ids), 0, 6);
-
-        $response->assertViewHas('latest', function ($latest) use ($expectedIds) {
-            return $latest->count() === 6
-                && $latest->pluck('id')
-                    ->map(fn ($id) => (int) $id)
-                    ->values()
-                    ->all() === $expectedIds;
-        });
-
-        // Chargement du contenu limité aux six identifiants.
-        $details = collect($queries)->filter(function ($entry) {
-            $sql = strtolower($entry['query']);
-
-            return str_contains($sql, 'sira_requests')
-                && preg_match('/\bselect\s+\*/i', $sql)
-                && !str_contains($sql, 'count(');
-        })->values();
-
-        $this->assertCount(1, $details);
-
-        $this->assertMatchesRegularExpression(
-            '/\bwhere\b.*\bin\s*\(/is',
-            $details[0]['query'],
-            'Le tableau de bord charge toutes les demandes.'
-        );
-
-        $selectedIds = array_map('intval', $details[0]['bindings']);
-
-        $this->assertEqualsCanonicalizing(
-            $expectedIds,
-            $selectedIds
-        );
+        $this->get('/manager')->assertOk();
+        Livewire::test(Dashboard::class)
+            ->assertSeeLivewire(ManagerOverview::class)
+            ->assertSeeLivewire(LatestRequests::class);
     }
 }

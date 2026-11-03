@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\DeployController;
-use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -22,9 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias(['admin' => EnsureAdmin::class, 'role' => EnsureRole::class]);
-        // Invités : l'ancien admin garde sa page de connexion, les clients et managers vont sur /connexion.
-        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*') ? '/admin/login' : '/connexion');
+        $middleware->alias(['role' => EnsureRole::class]);
+        // Invités : page de connexion du site (les panneaux Filament ont la leur).
+        $middleware->redirectGuestsTo('/connexion');
         // Vérifie la cohérence des sessions authentifiées.
         $middleware->authenticateSessions();
     })

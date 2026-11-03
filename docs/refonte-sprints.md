@@ -69,5 +69,5 @@ Branche : `refonte` (PR vers `main` en fin de refonte). Une fonctionnalité term
 
 | # | Fonctionnalité |
 |---|---|
-| 6.1 | Suppression de l'ancien admin et de l'ancien espace manager, redirection `/admin` → `/backoffice` |
+| 6.1 | ✅ Suppression de l'ancien admin et de l'ancien espace manager, redirection `/admin` → `/backoffice` |
 | 6.2 | Tests de non-régression, Pint sur les fichiers touchés, PR `refonte` → `main` |

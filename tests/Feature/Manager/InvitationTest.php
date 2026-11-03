@@ -108,23 +108,6 @@ class InvitationTest extends TestCase
         $this->assertNotSame($oldHash, $invitation->token_hash);
     }
 
-    public function test_resends_share_the_invitation_resend_quota_with_the_legacy_space(): void
-    {
-        Mail::spy();
-        $invitation = $this->invitation(['send_count' => 1]);
-        $page = Livewire::test(ManageInvitations::class);
-
-        for ($attempt = 0; $attempt < 5; $attempt++) {
-            $page->callAction(TestAction::make('resend')->table($invitation));
-        }
-
-        $page->callAction(TestAction::make('resend')->table($invitation))->assertNotified('Trop de renvois.');
-
-        $this->assertSame(6, $invitation->refresh()->send_count);
-        Mail::shouldHaveReceived('raw')->times(5);
-        $this->post(route('manager.invitations.resend', ['inv' => $invitation->id]))->assertStatus(429);
-    }
-
     public function test_revoking_a_pending_invitation(): void
     {
         $invitation = $this->invitation();
@@ -141,19 +124,5 @@ class InvitationTest extends TestCase
         Livewire::test(ManageInvitations::class)
             ->assertActionHidden(TestAction::make('resend')->table($invitation))
             ->assertActionHidden(TestAction::make('revoke')->table($invitation));
-    }
-
-    public function test_legacy_space_still_invites_through_the_shared_service(): void
-    {
-        User::factory()->client()->create(['email' => 'pris@example.test']);
-
-        $this->post(route('manager.invitations.store'), ['name' => 'Déjà client', 'email' => 'pris@example.test', 'role' => 'client'])
-            ->assertSessionHasErrors('email');
-
-        $this->post(route('manager.invitations.store'), ['name' => 'Awa Koné', 'email' => 'awa@example.test', 'role' => 'client'])
-            ->assertRedirect(route('manager.invitations'))
-            ->assertSessionHas('inv_link.name', 'Awa Koné');
-
-        $this->assertSame('pending', ClientInvitation::where('email', 'awa@example.test')->sole()->state());
     }
 }

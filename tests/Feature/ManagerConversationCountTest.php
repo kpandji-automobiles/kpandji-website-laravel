@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Conversation;
 use App\Models\InboxReply;
 use App\Models\User;
+use App\Support\DirectMessages;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -92,13 +93,9 @@ class ManagerConversationCountTest extends TestCase
         foreach (['sent', 'received'] as $box) {
             for ($number = 1; $number <= 12; $number++) {
                 $conversation = Conversation::create([
-                    'sender_id' => $box === 'sent'
-                        ? $manager->id
-                        : $client->id,
-                    'recipient_id' => $box === 'sent'
-                        ? $client->id
-                        : $manager->id,
-                    'subject' => 'Conversation ' . $number,
+                    'sender_id' => $box === 'sent' ? $manager->id : $client->id,
+                    'recipient_id' => $box === 'sent' ? $client->id : $manager->id,
+                    'subject' => 'Conversation '.$number,
                     'body' => 'Message initial',
                     'read_at' => null,
                 ]);
@@ -116,32 +113,19 @@ class ManagerConversationCountTest extends TestCase
             }
         }
 
-        $loadedIds = [];
-
-        Conversation::retrieved(function ($conversation) use (&$loadedIds) {
-            $loadedIds[] = (int) $conversation->id;
+        $loaded = 0;
+        Conversation::retrieved(function () use (&$loaded) {
+            $loaded++;
         });
 
-        $response = $this->actingAs($manager)->get(
-            route('manager.inbox', [
-                'box' => 'sent',
-                'page' => 2,
-            ])
-        );
-
-        $response->assertOk();
-
-        $response->assertViewHas('boxCounts', [
+        // Compteurs des onglets « Reçus » / « Envoyés » de l'espace manager.
+        $this->assertSame([
             'sent' => 12,
-            'received' => 12,
             'sent_unread' => 1,
+            'received' => 12,
             'received_unread' => 13,
-        ]);
+        ], DirectMessages::boxCounts($manager));
 
-        $this->assertCount(
-            2,
-            $loadedIds,
-            'Seules les deux conversations de la page doivent être chargées.'
-        );
+        $this->assertSame(0, $loaded, 'Les compteurs doivent être calculés en base, sans charger les conversations.');
     }
 }

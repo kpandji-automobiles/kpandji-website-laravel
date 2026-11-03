@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Manager\Pages\OtherRequests;
 use App\Models\SiraRequest;
+use App\Models\User;
 use App\Support\Inbox;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class ManagerInboxPaginationTest extends TestCase
@@ -20,11 +24,11 @@ class ManagerInboxPaginationTest extends TestCase
 
         for ($number = 1; $number <= 25; $number++) {
             $request = SiraRequest::create([
-                'name' => 'Client ' . $number,
+                'name' => 'Client '.$number,
                 'country' => 'Côte d’Ivoire',
                 'city' => 'Abidjan',
                 'phone' => '0102030405',
-                'email' => 'client' . $number . '@example.test',
+                'email' => 'client'.$number.'@example.test',
                 'created_at' => $now->copy()->subMinutes(25 - $number),
             ]);
 
@@ -64,7 +68,7 @@ class ManagerInboxPaginationTest extends TestCase
             array_slice(array_reverse($ids), 10, 10),
             collect($page->items())
                 ->pluck('id')
-                ->map(fn($id) => (int) $id)
+                ->map(fn ($id) => (int) $id)
                 ->all()
         );
         // Requête qui charge le contenu des demandes.
@@ -72,7 +76,7 @@ class ManagerInboxPaginationTest extends TestCase
             $sql = strtolower($entry['query']);
 
             return str_contains($sql, 'sira_requests')
-                && !str_contains($sql, 'count(');
+                && ! str_contains($sql, 'count(');
         })->values();
 
         $this->assertCount(1, $detailQueries);
@@ -106,11 +110,11 @@ class ManagerInboxPaginationTest extends TestCase
 
         for ($number = 1; $number <= 15; $number++) {
             $request = SiraRequest::create([
-                'name' => 'Client ' . $number,
+                'name' => 'Client '.$number,
                 'country' => 'Côte d’Ivoire',
                 'city' => 'Abidjan',
                 'phone' => '0102030405',
-                'email' => 'client' . $number . '@example.test',
+                'email' => 'client'.$number.'@example.test',
             ]);
 
             $request->created_at = $now->copy()->subMinutes(15 - $number);
@@ -144,7 +148,7 @@ class ManagerInboxPaginationTest extends TestCase
             array_slice(array_reverse($expectedIds), 10, 10),
             collect($page->items())
                 ->pluck('id')
-                ->map(fn($id) => (int) $id)
+                ->map(fn ($id) => (int) $id)
                 ->all()
         );
 
@@ -153,6 +157,7 @@ class ManagerInboxPaginationTest extends TestCase
             collect($page->items())->pluck('status')->unique()->values()->all()
         );
     }
+
     /** Filtrage selon la présence de réponses. */
     public function test_it_filters_requests_with_and_without_replies(): void
     {
@@ -160,11 +165,11 @@ class ManagerInboxPaginationTest extends TestCase
 
         for ($number = 1; $number <= 3; $number++) {
             $request = SiraRequest::create([
-                'name' => 'Client ' . $number,
+                'name' => 'Client '.$number,
                 'country' => 'Côte d’Ivoire',
                 'city' => 'Abidjan',
                 'phone' => '0102030405',
-                'email' => 'client' . $number . '@example.test',
+                'email' => 'client'.$number.'@example.test',
             ]);
 
             $ids[] = (int) $request->id;
@@ -206,7 +211,7 @@ class ManagerInboxPaginationTest extends TestCase
             [$ids[0]],
             collect($withReplies->items())
                 ->pluck('id')
-                ->map(fn($id) => (int) $id)
+                ->map(fn ($id) => (int) $id)
                 ->all()
         );
 
@@ -217,11 +222,10 @@ class ManagerInboxPaginationTest extends TestCase
             [$ids[1], $ids[2]],
             collect($withoutReplies->items())
                 ->pluck('id')
-                ->map(fn($id) => (int) $id)
+                ->map(fn ($id) => (int) $id)
                 ->all()
         );
     }
-
 
     /** Bornes de dates inclusives. */
     public function test_it_filters_by_date_before_paginating(): void
@@ -266,7 +270,7 @@ class ManagerInboxPaginationTest extends TestCase
     /** Filtrage par source avant pagination. */
     public function test_it_filters_by_source(): void
     {
-        $client = \App\Models\User::factory()->create([
+        $client = User::factory()->create([
             'role' => 'client',
         ]);
 
@@ -298,6 +302,7 @@ class ManagerInboxPaginationTest extends TestCase
         $this->assertSame('sira', $page->items()[0]['source']);
         $this->assertSame((int) $sira->id, (int) $page->items()[0]['id']);
     }
+
     /** Recherche avant le calcul des pages. */
     public function test_it_searches_before_paginating(): void
     {
@@ -305,11 +310,11 @@ class ManagerInboxPaginationTest extends TestCase
 
         for ($number = 1; $number <= 12; $number++) {
             $request = SiraRequest::create([
-                'name' => 'Candidat Kpandji ' . $number,
+                'name' => 'Candidat Kpandji '.$number,
                 'country' => 'Côte d’Ivoire',
                 'city' => 'Abidjan',
                 'phone' => '0102030405',
-                'email' => 'client' . $number . '@example.test',
+                'email' => 'client'.$number.'@example.test',
             ]);
 
             $expectedIds[] = (int) $request->id;
@@ -392,26 +397,27 @@ class ManagerInboxPaginationTest extends TestCase
 
         $this->assertSame(0, $injection->total());
     }
+
     /** Pagination et compteurs dans la page manager. */
     public function test_the_manager_page_paginates_filtered_requests(): void
     {
-        $manager = \App\Models\User::factory()->create([
-            'role' => 'manager',
-        ]);
-
+        Filament::setCurrentPanel('manager');
+        $this->actingAs(User::factory()->manager()->create());
         $now = now();
+        $ids = [];
 
         for ($number = 1; $number <= 13; $number++) {
             $request = SiraRequest::create([
-                'name' => 'Candidat pagination ' . $number,
+                'name' => 'Candidat pagination '.$number,
                 'country' => 'Côte d’Ivoire',
                 'city' => 'Abidjan',
                 'phone' => '0102030405',
-                'email' => 'client' . $number . '@example.test',
+                'email' => 'client'.$number.'@example.test',
             ]);
 
             $request->created_at = $now->copy()->subMinutes(13 - $number);
             $request->save();
+            $ids[$number] = 'sira-'.$request->id;
 
             DB::table('inbox_statuses')->insert([
                 'source' => 'sira',
@@ -420,45 +426,13 @@ class ManagerInboxPaginationTest extends TestCase
             ]);
         }
 
-        $response = $this->actingAs($manager)->get(
-            route('manager.other', [
-                'source' => 'sira',
-                'status' => 'en_cours',
-                'page' => 2,
-            ])
-        );
-
-        $response->assertOk();
-        $response->assertViewIs('spaces.manager.inbox');
-
-        $response->assertViewHas('items', function ($items) {
-            return $items instanceof
-                \Illuminate\Pagination\LengthAwarePaginator
-                && $items->currentPage() === 2
-                && $items->total() === 12
-                && $items->count() === 2;
-        });
-
-        // Les compteurs de statut restent indépendants du filtre.
-        $response->assertViewHas('counts', function ($counts) {
-            return $counts->get('en_cours') === 12
-                && $counts->get('traite') === 1;
-        });
-
-        $response->assertSeeText('Candidat pagination 1');
-        $response->assertSeeText('Candidat pagination 2');
-        $response->assertDontSeeText('Candidat pagination 13');
-
-        // Les liens conservent les filtres.
-        $response->assertViewHas('items', function ($items) {
-            parse_str(
-                parse_url($items->url(1), PHP_URL_QUERY),
-                $parameters
-            );
-
-            return ($parameters['source'] ?? null) === 'sira'
-                && ($parameters['status'] ?? null) === 'en_cours'
-                && ($parameters['page'] ?? null) === '1';
-        });
+        // Page « Autres demandes » : 12 demandes en cours, la page 2 contient les deux plus anciennes.
+        Livewire::test(OtherRequests::class)
+            ->filterTable('source', 'sira')
+            ->filterTable('status', 'en_cours')
+            ->set('tableRecordsPerPage', 10)
+            ->call('gotoPage', 2)
+            ->assertCanSeeTableRecords([$ids[1], $ids[2]])
+            ->assertCanNotSeeTableRecords([$ids[3], $ids[13]]);
     }
 }

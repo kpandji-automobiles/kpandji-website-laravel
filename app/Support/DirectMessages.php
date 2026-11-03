@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Filament\Manager\Resources\Conversations\ConversationResource;
 use App\Models\Conversation;
 use App\Models\InboxReply;
 use App\Models\User;
@@ -62,7 +63,7 @@ final class DirectMessages
 
         foreach ($users as $user) {
             $conversation = Conversation::create(['sender_id' => $sender->id, 'recipient_id' => $user->id, 'subject' => $subject, 'body' => $body, 'batch' => $batch]);
-            $link = $user->role === 'client' ? route('client.thread', 'dm-'.$conversation->id) : route('manager.conversation', $conversation);
+            $link = $user->role === 'client' ? route('client.thread', 'dm-'.$conversation->id) : ConversationResource::getUrl('view', ['record' => $conversation], panel: 'manager');
             $conversation->forceFill(['mail_status' => SpaceMail::send($user->email, $subject, $body."\n\n— ".$sender->name.", KPANDJI\n".$link)])->save();
         }
 

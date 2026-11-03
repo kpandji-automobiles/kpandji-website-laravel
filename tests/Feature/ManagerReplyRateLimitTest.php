@@ -2,83 +2,61 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Manager\Pages\ContactRequests;
 use App\Models\TestDriveRequest;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class ManagerReplyRateLimitTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_limits_replies_without_extra_sends_or_records(): void
+    private function contact(string $email): TestDriveRequest
     {
-        Mail::spy();
-
-        $manager = User::factory()->create([
-            'role' => 'manager',
-            'account_status' => 'active',
-        ]);
-
-        $contact = TestDriveRequest::create([
+        return TestDriveRequest::create([
             'type' => 'contact',
             'name' => 'Contact de test',
-            'email' => 'contact@example.test',
+            'email' => $email,
             'phone' => '0102030405',
             'subject' => 'Information',
             'message' => 'Demande de renseignements',
         ]);
+    }
 
-        $url = route('manager.message.reply', [
-            'source' => 'contact',
-            'id' => $contact->id,
-        ]);
+    public function test_it_limits_replies_without_extra_sends_or_records(): void
+    {
+        Mail::spy();
+        Filament::setCurrentPanel('manager');
 
-        $this->actingAs($manager);
+        $contact = $this->contact('contact@example.test');
+        $otherContact = $this->contact('autre-contact@example.test');
+        $this->actingAs(User::factory()->manager()->create());
 
         // Dix réponses autorisées.
+        $page = Livewire::test(ContactRequests::class);
         for ($attempt = 0; $attempt < 10; $attempt++) {
-            $this->post($url, ['body' => 'Réponse de test'])
-                ->assertRedirect();
+            $page->callAction(TestAction::make('reply')->table('contact-'.$contact->id), ['body' => 'Réponse de test']);
         }
 
-        Mail::shouldHaveReceived('raw')->times(10);
+        // Réponse supplémentaire refusée, même sur une autre demande.
+        Livewire::test(ContactRequests::class)
+            ->callAction(TestAction::make('reply')->table('contact-'.$otherContact->id), ['body' => 'Réponse supplémentaire'])
+            ->assertNotified('Trop de réponses.');
+
         $this->assertDatabaseCount('inbox_replies', 10);
-
-        // Réponse supplémentaire refusée.
-        $this->post($url, ['body' => 'Réponse supplémentaire'])
-            ->assertStatus(429);
-
         Mail::shouldHaveReceived('raw')->times(10);
-        $this->assertDatabaseCount('inbox_replies', 10);
 
-        // Autre demande, même quota du manager.
-        $otherContact = TestDriveRequest::create([
-            'type' => 'contact',
-            'name' => 'Autre contact',
-            'email' => 'autre-contact@example.test',
-            'phone' => '0102030405',
-        ]);
+        // Autre manager, quota disponible.
+        $this->actingAs(User::factory()->manager()->create());
+        Livewire::test(ContactRequests::class)
+            ->callAction(TestAction::make('reply')->table('contact-'.$otherContact->id), ['body' => 'Réponse d’un autre manager'])
+            ->assertNotified('Réponse envoyée.');
 
-        $otherUrl = route('manager.message.reply', [
-            'source' => 'contact',
-            'id' => $otherContact->id,
-        ]);
-
-        $this->post($otherUrl, ['body' => 'Autre réponse'])
-            ->assertStatus(429);
-
-        Mail::shouldHaveReceived('raw')->times(10);
-        $this->assertDatabaseCount('inbox_replies', 10);
-
-        // Reprise après expiration.
-        $this->travel(61)->seconds();
-
-        $this->post($otherUrl, ['body' => 'Réponse après expiration'])
-            ->assertRedirect();
-
-        Mail::shouldHaveReceived('raw')->times(11);
         $this->assertDatabaseCount('inbox_replies', 11);
     }
 }

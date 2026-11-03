@@ -2,42 +2,39 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Pages\Pages\CreatePage;
+use App\Filament\Resources\Pages\Pages\EditPage;
 use App\Models\Page;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class CmsPageSanitizationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->admin()->create());
+    }
+
     public function test_it_sanitizes_page_content_before_saving(): void
     {
-        $admin = User::factory()->create([
-            'is_admin' => true,
-        ]);
-
-        $response = $this->actingAs($admin)->post(
-            route('admin.pages.store'),
-            [
+        Livewire::test(CreatePage::class)
+            ->fillForm([
                 'title' => 'Page de test',
                 'slug' => 'page-de-test',
                 'published' => true,
-                'body' => '<p x-data x-init="window.__kpAudit=1">'
-                    . 'Bonjour <strong>Émile</strong></p>',
-            ]
-        );
-
-        $response->assertSessionHasNoErrors();
+                'body' => '<p x-data x-init="window.__kpAudit=1">Bonjour <strong>Émile</strong></p>',
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
 
         $page = Page::where('slug', 'page-de-test')->firstOrFail();
-
-        $response->assertRedirect(route('admin.pages.edit', $page));
-
-        $this->assertSame(
-            '<p>Bonjour <strong>Émile</strong></p>',
-            $page->body
-        );
+        $this->assertSame('<p>Bonjour <strong>Émile</strong></p>', $page->body);
 
         // Vérifie le HTML renvoyé au navigateur.
         $this->get(route('page.show', ['slug' => $page->slug]))
@@ -48,10 +45,6 @@ class CmsPageSanitizationTest extends TestCase
 
     public function test_it_sanitizes_page_content_when_updating(): void
     {
-        $admin = User::factory()->create([
-            'is_admin' => true,
-        ]);
-
         $page = Page::create([
             'title' => 'Page existante',
             'slug' => 'page-existante',
@@ -59,23 +52,11 @@ class CmsPageSanitizationTest extends TestCase
             'published' => true,
         ]);
 
-        $response = $this->actingAs($admin)->put(
-            route('admin.pages.update', $page),
-            [
-                'title' => 'Page existante',
-                'slug' => 'page-existante',
-                'published' => true,
-                'body' => '<p x-data x-init="window.__kpAudit=1">'
-                    . 'Nouveau <strong>contenu</strong></p>',
-            ]
-        );
+        Livewire::test(EditPage::class, ['record' => $page->getRouteKey()])
+            ->fillForm(['body' => '<p x-data x-init="window.__kpAudit=1">Nouveau <strong>contenu</strong></p>'])
+            ->call('save')
+            ->assertHasNoFormErrors();
 
-        $response->assertSessionHasNoErrors();
-        $response->assertRedirect(route('admin.pages.edit', $page));
-
-        $this->assertSame(
-            '<p>Nouveau <strong>contenu</strong></p>',
-            $page->fresh()->body
-        );
+        $this->assertSame('<p>Nouveau <strong>contenu</strong></p>', $page->fresh()->body);
     }
 }

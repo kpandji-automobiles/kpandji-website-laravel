@@ -28,10 +28,9 @@ class AccountPagesTest extends TestCase
         $this->actingAs($client)->get('/connexion')->assertRedirect($client->workspaceUrl());
     }
 
-    public function test_guests_go_to_the_login_page_except_on_the_legacy_admin(): void
+    public function test_guests_go_to_the_login_page(): void
     {
         $this->get('/mon-compte/mot-de-passe')->assertRedirect(route('connexion'));
-        $this->get('/admin')->assertRedirect(route('login'));
     }
 
     public function test_failed_login_comes_back_to_the_page_with_a_french_error(): void

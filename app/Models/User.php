@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -66,13 +67,13 @@ class User extends Authenticatable implements FilamentUser
     public function workspaceUrl(): ?string
     {
         if ($this->isAdmin()) {
-            return route('admin.dashboard');
+            return Filament::getPanel('admin')->getUrl();
         }
         if (in_array($this->role, ['manager', 'client'], true) && ! $this->isActive()) {
             return route('space.waiting');
         }
         if ($this->role === 'manager') {
-            return route('manager.dashboard');
+            return Filament::getPanel('manager')->getUrl();
         }
         if ($this->role === 'client') {
             return route('client.dashboard');

@@ -2,10 +2,16 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\Investment;
+use App\Models\Setting;
+use App\Policies\InvestmentPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,16 +46,15 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(10)
                 ->by((string) $request->user()->id);
         });
-        \Illuminate\Support\Facades\Gate::policy(\App\Models\Investment::class, \App\Policies\InvestmentPolicy::class);
+        Gate::policy(Investment::class, InvestmentPolicy::class);
 
         // CMS : @content('hero.title1') affiche un contenu éditable (échappé)
-        \Illuminate\Support\Facades\Blade::directive('content', fn($e) => "<?php echo e(content($e)); ?>");
-        \Illuminate\Support\Facades\Blade::directive('cmsEdit', fn($e) => "<?php echo cms_edit($e); ?>");
+        Blade::directive('content', fn ($e) => "<?php echo e(content($e)); ?>");
 
         // Paramètres promo stockés en base (admin) -> écrasent config/promo.php
         try {
-            if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
-                $s = \App\Models\Setting::allCached();
+            if (Schema::hasTable('settings')) {
+                $s = Setting::allCached();
                 foreach (['title', 'subtitle', 'reduction_percent', 'ends_at', 'active'] as $k) {
                     if (array_key_exists("promo.$k", $s) && $s["promo.$k"] !== null && $s["promo.$k"] !== '') {
                         config(["promo.$k" => $k === 'reduction_percent' ? (float) $s["promo.$k"] : ($k === 'active' ? (bool) $s["promo.$k"] : $s["promo.$k"])]);
