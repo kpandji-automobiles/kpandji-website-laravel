@@ -55,7 +55,7 @@ Branche : `refonte` (PR vers `main` en fin de refonte). Une fonctionnalité term
 |---|---|
 | 4.1 | ✅ Header, footer, accueil (visuel plein cadre, recherche, types, tuiles, offres, budget) |
 | 4.2 | ✅ Catalogue avec filtres et fiche modèle |
-| 4.3 | Showroom, opportunités, marque / écologie / pages libres |
+| 4.3 | ✅ Showroom, opportunités, marque / écologie / pages libres |
 
 ## Sprint 5 — Front : formulaires et espace client
 

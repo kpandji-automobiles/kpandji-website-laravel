@@ -3,7 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+@hasSection('seo_title')
+<title>@yield('seo_title')</title>
+@else
 <title>@hasSection('title')@yield('title') — KPANDJI @else KPANDJI — Constructeur automobile @endif</title>
+@endif
 @hasSection('meta_description')<meta name="description" content="@yield('meta_description')">@endif
 @stack('meta')
 <link rel="icon" href="{{ asset('favicon.ico') }}">

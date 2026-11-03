@@ -33,7 +33,7 @@ class SiteController extends Controller
 
     public function showroom()
     {
-        return view('showroom', ['models' => Modele::showroom()->get()]);
+        return view('showroom', ['models' => Modele::showroom()->get(), 'cars' => Car::visible()->get()->keyBy('slug')]);
     }
 
     public function show(Car $car)
