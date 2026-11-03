@@ -10,7 +10,7 @@ Branche : `refonte` (PR vers `main` en fin de refonte). Une fonctionnalité term
 ## Définition de « terminé » (chaque fonctionnalité)
 
 1. Tests feature (ou Livewire pour Filament) couvrant accès + comportement ; `php artisan test` vert.
-2. `vendor/bin/pint --dirty` (jamais sur `routes/web.php` avant son nettoyage).
+2. `vendor/bin/pint --dirty` (`routes/web.php` compris depuis le 6.2 : tous les `use` restent groupés en haut du fichier).
 3. `php artisan route:cache` OK (la finalisation de déploiement fait `optimize`).
 4. Un commit `feat(...)` / `refactor(...)` par fonctionnalité.
 
@@ -70,4 +70,4 @@ Branche : `refonte` (PR vers `main` en fin de refonte). Une fonctionnalité term
 | # | Fonctionnalité |
 |---|---|
 | 6.1 | ✅ Suppression de l'ancien admin et de l'ancien espace manager, redirection `/admin` → `/backoffice` |
-| 6.2 | Tests de non-régression, Pint sur les fichiers touchés, PR `refonte` → `main` |
+| 6.2 | ✅ Tests de non-régression, Pint sur les fichiers touchés, PR `refonte` → `main` (#4) |
