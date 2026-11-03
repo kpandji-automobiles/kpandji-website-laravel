@@ -42,3 +42,6 @@ Thumbs.db
 !/storage/**/.gitignore
 /vendor/
 /node_modules/
+
+# release déployée (écrit par GitHub Actions)
+/RELEASE
