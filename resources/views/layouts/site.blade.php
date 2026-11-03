@@ -12,16 +12,26 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap">
 <link rel="stylesheet" href="{{ asset('css/kpandji/tokens.css') }}">
 <link rel="stylesheet" href="{{ asset('css/kpandji/components.css') }}">
+<link rel="stylesheet" href="{{ asset('css/kpandji/site.css') }}">
 <style>body{margin:0;background:var(--surface);color:var(--ink);font-family:var(--font-sans)}[x-cloak]{display:none!important}</style>
 @stack('head')
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
 </head>
 <body class="kp">
+<a class="kp-skip" href="#contenu">Aller au contenu</a>
+@hasSection('header')
 @yield('header')
+@else
+@include('site.header')
+@endif
 <main id="contenu">
 @yield('content')
 </main>
+@hasSection('footer')
 @yield('footer')
+@else
+@include('site.footer')
+@endif
 @stack('scripts')
 </body>
 </html>

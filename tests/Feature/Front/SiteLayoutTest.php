@@ -2,11 +2,14 @@
 
 namespace Tests\Feature\Front;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Tests\TestCase;
 
 class SiteLayoutTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_layout_loads_the_design_system_and_renders_the_page_content(): void
     {
         $html = Blade::render("@extends('layouts.site')\n@section('title', 'Nos modèles')\n@section('content')<p>Contenu de la page</p>@endsection");
