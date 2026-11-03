@@ -1,0 +1,72 @@
+/* KPANDJI — tokens du design system (source : Claude Design, artefact F9ofFAi7mbT9mrGKu6JuHJ). Ne pas modifier à la main. */
+:root, [data-theme="light"] {
+  --surface: #ffffff;
+  --surface-alt: #f5f3ef;
+  --surface-raised: #ffffff;
+  --stage: #050505;
+  --on-stage: #ffffff;
+  --on-stage-muted: #c9c6bf;
+  --ink: #0a0a0a;
+  --ink-muted: #5f6168;
+  --line: #e4e0d8;
+  --line-control: #8b877f;
+  --gold: #c9a962;
+  --on-gold: #0a0a0a;
+  --gold-ink: #7a5c1e;
+  --sand: #e8e4dc;
+  --success: #1f6f43;
+  --danger: #b42318;
+  --warning: #9a5b00;
+  --info: #1f4fa3;
+  --focus: var(--gold-ink);
+  --shadow-raise: 0 1px 2px rgba(10,10,10,0.06), 0 8px 24px rgba(10,10,10,0.08);
+}
+[data-theme="dark"] {
+  --surface: #0a0a0a;
+  --surface-alt: #16161a;
+  --surface-raised: #1f1f24;
+  --stage: #050505;
+  --on-stage: #ffffff;
+  --on-stage-muted: #c9c6bf;
+  --ink: #f5f3ef;
+  --ink-muted: #a3a6ad;
+  --line: #2a2a30;
+  --line-control: #76797f;
+  --gold: #c9a962;
+  --on-gold: #0a0a0a;
+  --gold-ink: #d9c08a;
+  --sand: #2a2620;
+  --success: #7cc79b;
+  --danger: #f0a49b;
+  --warning: #e0b25c;
+  --info: #8fb4f0;
+  --focus: var(--gold-ink);
+  --shadow-raise: 0 8px 24px rgba(0,0,0,0.55);
+}
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --radius-none: 0px;
+  --radius-s: 2px;
+  --radius-pill: 999px;
+  --radius-round: 50%;
+  --font-sans: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+}
+.display-xl { font-family: var(--font-sans); font-size: 64px; line-height: 68px; font-weight: 300; letter-spacing: -0.02em; }
+.display-l { font-family: var(--font-sans); font-size: 44px; line-height: 50px; font-weight: 300; letter-spacing: -0.015em; }
+.heading-l { font-family: var(--font-sans); font-size: 32px; line-height: 38px; font-weight: 600; }
+.heading-m { font-family: var(--font-sans); font-size: 24px; line-height: 30px; font-weight: 600; }
+.heading-s { font-family: var(--font-sans); font-size: 18px; line-height: 24px; font-weight: 600; }
+.body-l { font-family: var(--font-sans); font-size: 17px; line-height: 28px; font-weight: 400; }
+.body { font-family: var(--font-sans); font-size: 15px; line-height: 24px; font-weight: 400; }
+.body-s { font-family: var(--font-sans); font-size: 13px; line-height: 20px; font-weight: 400; }
+.label { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; }
+.price-l { font-family: var(--font-sans); font-size: 32px; line-height: 36px; font-weight: 700; }
+.price-m { font-family: var(--font-sans); font-size: 20px; line-height: 24px; font-weight: 700; }

@@ -2,13 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\JobApplications\JobApplicationResource;
+use App\Filament\Resources\JobApplications\Pages\ManageJobApplications;
+use App\Models\JobApplication;
+use App\Models\User;
+use Filament\Actions\Testing\TestAction;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Tests\TestCase;
-use App\Models\JobApplication;
+use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
-use App\Models\User;
+use Tests\TestCase;
 
 class CvUploadSecurityTest extends TestCase
 {
@@ -65,7 +70,7 @@ class CvUploadSecurityTest extends TestCase
     ): void {
         Storage::fake('local');
 
-        $path = base_path('tests/Fixtures/' . $filename);
+        $path = base_path('tests/Fixtures/'.$filename);
         $this->assertFileExists($path);
 
         // Fichier réel avec détection du type côté serveur.
@@ -187,28 +192,26 @@ class CvUploadSecurityTest extends TestCase
         ]);
 
         if ($role !== null) {
-            $user = User::factory()->create([
+            $this->actingAs(User::factory()->create([
                 'role' => $role,
                 'is_admin' => $role === 'admin',
                 'account_status' => 'active',
-            ]);
-
-            $this->actingAs($user);
+            ]));
         }
 
-        $response = $this->get(route('admin.emplois.applications.cv', [
-            'item' => $application->id,
-        ]));
-
+        // Le CV ne se télécharge que depuis la liste des candidatures du back-office.
+        $response = $this->get(JobApplicationResource::getUrl(panel: 'admin'));
         $response->assertStatus($expectedStatus);
 
         if ($role === null) {
-            $response->assertRedirect(route('login'));
+            $response->assertRedirect(Filament::getPanel('admin')->getLoginUrl());
         }
 
         if ($role === 'admin') {
-            $response->assertDownload('cv.pdf');
-            $response->assertStreamedContent($pdf);
+            Filament::setCurrentPanel('admin');
+            Livewire::test(ManageJobApplications::class)
+                ->callAction(TestAction::make('downloadCv')->table($application))
+                ->assertFileDownloaded('cv.pdf', $pdf);
         }
     }
 }

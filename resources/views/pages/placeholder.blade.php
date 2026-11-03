@@ -1,21 +1,31 @@
-@extends('layouts.app')
+{{-- Page libre créée dans le back-office (design system). Le corps HTML est filtré à l'enregistrement (App\Models\Page). --}}
+@extends('layouts.site')
 @section('title', $page->title)
 @if($page->seo_title)@section('seo_title', $page->seo_title)@endif
 @if($page->seo_description)@section('meta_description', $page->seo_description)@endif
+
 @section('content')
 @if($page->hero_image)
-<div class="relative h-[38vh] min-h-[260px] w-full overflow-hidden"><img src="{{ cms_asset($page->hero_image) }}" alt="" class="h-full w-full object-cover"><div class="absolute inset-0 bg-gradient-to-b from-black/30 to-kp-black"></div></div>
+  @include('site.editorial.hero', ['image' => $page->hero_image, 'crumbs' => $page->title, 'kicker' => $page->kicker, 'title' => $page->title, 'text' => $page->intro])
+@else
+  <section class="kp-catalog-head">
+    <div class="kp-wrap kp-section__intro kp-catalog-head__inner">
+      @if(filled($page->kicker))<span class="kp-eyebrow">{{ $page->kicker }}</span>@endif
+      <h1 class="display-l">{{ $page->title }}</h1>
+      @if(filled($page->intro))<p class="body-l kp-muted kp-editorial__lead">{{ $page->intro }}</p>@endif
+    </div>
+  </section>
 @endif
-<section class="max-w-4xl mx-auto px-6 pt-20 pb-10 text-center relative">
-  {!! cms_edit(route('admin.pages.edit', $page), 'Modifier cette page', '1rem') !!}
-  <p class="text-kp-gold uppercase tracking-[0.3em] text-sm">{{ $page->kicker }}</p>
-  <h1 class="mt-3 font-serif text-5xl font-semibold text-white">{{ $page->title }}</h1>
-  <p class="mt-6 text-lg text-kp-sand/80">{{ $page->intro }}</p>
-  @if($page->body)<div class="kp-prose mt-10 text-left text-base leading-relaxed text-white/75">{!! $page->body !!}</div>@endif
-  <div class="mt-10 flex flex-wrap justify-center gap-3">
-    <a href="{{ route('cars.index') }}" class="rounded-full border border-white/20 px-6 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-white hover:border-white/40">@content('page.btn_models')</a>
-    <a href="{{ route('essai') }}" class="rounded-full bg-white px-6 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-black hover:bg-white/90">@content('page.btn_essai')</a>
+
+<section class="kp-wrap kp-section" data-kp-page="{{ $page->slug }}">
+  @if($page->body)
+    <div class="kp-prose">{!! $page->body !!}</div>
+  @else
+    <p class="body-s kp-muted">{{ content('page.draft_note') }}</p>
+  @endif
+  <div class="kp-home-hero__actions">
+    <a class="kp-btn kp-btn--secondary" href="{{ route('cars.index') }}">{{ content('page.btn_models') }}</a>
+    <a class="kp-btn kp-btn--gold" href="{{ route('essai') }}">{{ content('page.btn_essai') }}</a>
   </div>
-  @unless($page->body)<p class="mt-12 text-xs text-white/30">@content('page.draft_note')</p>@endunless
 </section>
 @endsection
