@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Déploie le dossier courant (déjà buildé, vendor inclus) sur l'hébergement cPanel, sans accès shell :
-#   1. upload SFTP dans releases/<RELEASE>
+#   1. upload SFTP dans releases/<RELEASE> ; les gros fichiers inchangés depuis la release en ligne
+#      sont liés en dur au lieu d'être renvoyés (médias de public/ : ~200 Mo)
 #   2. liens storage et .env vers shared/
 #   3. bascule atomique du lien current
 #   4. finalisation (migrate, storage:link, optimize) via POST /_deploy/finalize
@@ -14,6 +15,8 @@ set -euo pipefail
 
 : "${DEPLOY_HOST:?}" "${DEPLOY_USER:?}" "${DEPLOY_PATH:?}" "${DEPLOY_KEY_FILE:?}" "${DEPLOY_KNOWN_HOSTS_FILE:?}"
 KEEP_RELEASES="${KEEP_RELEASES:-5}"
+# Empreintes des gros fichiers de la release, pour lier les inchangés au déploiement suivant.
+MANIFEST=.deploy-manifest
 
 SSH_OPTS="-i $DEPLOY_KEY_FILE -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$DEPLOY_KNOWN_HOSTS_FILE"
 WORK="$(mktemp -d)"
@@ -37,6 +40,36 @@ lftp_run() {
 live_release() {
     remote <<< "-get .current_release $WORK/current_release" > /dev/null 2>&1 || true
     [ -f "$WORK/current_release" ] && tr -d '[:space:]' < "$WORK/current_release" || true
+}
+
+# Écrit le manifeste et met de côté les gros fichiers identiques à ceux de la release en ligne.
+hold_unchanged_files() {
+    local previous="$1" sha=sha256sum
+    command -v sha256sum > /dev/null || sha="shasum -a 256"
+    # shellcheck disable=SC2086
+    find . -type f -size +256k -print0 | xargs -0 $sha > "$MANIFEST"
+    : > "$WORK/held"
+    [ -n "$previous" ] || return 0
+    remote <<< "-get releases/$previous/$MANIFEST $WORK/previous_manifest" > /dev/null 2>&1 || true
+    [ -f "$WORK/previous_manifest" ] || return 0
+    grep -Fxf "$WORK/previous_manifest" "$MANIFEST" | cut -c67- | sed 's#^\./##' > "$WORK/held" || true
+    while IFS= read -r file; do
+        mkdir -p "$WORK/files/$(dirname "$file")"
+        mv "$file" "$WORK/files/$file"
+    done < "$WORK/held"
+    echo "$(wc -l < "$WORK/held" | tr -d ' ') gros fichiers inchangés seront liés depuis $previous"
+}
+
+# Lie en dur les fichiers mis de côté depuis la release en ligne, puis les remet dans le build local.
+link_held_files() {
+    local previous="$1"
+    [ -s "$WORK/held" ] || return 0
+    {
+        awk -F/ '{ p = ""; for (i = 1; i < NF; i++) { p = (p == "" ? $i : p "/" $i); print p } }' "$WORK/held" \
+            | sort -u | sed "s#.*#-mkdir \"releases/$RELEASE/&\"#"
+        sed "s#.*#ln \"releases/$previous/&\" \"releases/$RELEASE/&\"#" "$WORK/held"
+    } | remote > /dev/null
+    cp -Rp "$WORK/files/." .
 }
 
 point_current_to() {
@@ -83,8 +116,10 @@ deploy() {
     previous="$(live_release)"
     echo "Release en ligne : ${previous:-aucune} → nouvelle release : $RELEASE"
 
+    hold_unchanged_files "$previous"
     echo "Upload des fichiers…"
     lftp_run "mirror --reverse --parallel=8 --verbose=0 . releases/$RELEASE"
+    link_held_files "$previous"
 
     echo "Liens partagés et bascule de current…"
     remote <<EOF
@@ -96,8 +131,9 @@ EOF
     echo "Finalisation (migrate, storage:link, optimize)…"
     finalize
 
-    echo "Health-check $APP_URL/up…"
+    echo "Health-check $APP_URL/up et page d'accueil…"
     curl -fsS -o /dev/null --retry 3 --retry-delay 5 --retry-all-errors "$APP_URL/up"
+    curl -fsS -o /dev/null --retry 3 --retry-delay 5 --retry-all-errors "$APP_URL/"
 
     echo "$RELEASE" > "$WORK/new_release"
     remote <<< "put $WORK/new_release .current_release" > /dev/null

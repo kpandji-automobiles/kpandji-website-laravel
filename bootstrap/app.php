@@ -16,8 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function (): void {
             // Hors du groupe web (ni session ni CSRF) : appelé par GitHub Actions, protégé par DEPLOY_HOOK_TOKEN.
+            // Pas de throttle : son cache en base n'existe pas avant la première migration.
             Route::post('/_deploy/finalize', DeployController::class)
-                ->middleware('throttle:20,1')
                 ->name('deploy.finalize');
         },
     )
