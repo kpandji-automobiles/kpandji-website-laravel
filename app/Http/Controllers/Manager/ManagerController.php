@@ -11,6 +11,7 @@ use App\Models\RevenueEntry;
 use App\Models\User;
 use App\Support\AccountValidation;
 use App\Support\Inbox;
+use App\Support\Invitations;
 use App\Support\SpaceMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -63,33 +64,26 @@ class ManagerController extends Controller
     public function invite(Request $r)
     {
         $d = $r->validate(['name' => 'required|string|max:120', 'email' => 'required|email|max:190', 'phone' => 'nullable|string|max:40', 'role' => ['required', Rule::in(['client', 'manager'])]]);
-        $d['email'] = strtolower(trim($d['email']));
-        if (User::where('email', $d['email'])->exists()) {
+        if (Invitations::emailTaken($d['email'])) {
             return back()->withInput()->withErrors(['email' => sp_t('inv_exists')]);
         }
-        // Une invitation ouverte par e-mail : on révoque les précédentes non acceptées
-        ClientInvitation::where('email', $d['email'])->whereNull('accepted_at')->whereNull('revoked_at')->update(['revoked_at' => now()]);
-        $inv = ClientInvitation::create($d + ['invited_by' => $r->user()->id, 'token_hash' => '', 'expires_at' => now()->addDays(ClientInvitation::DAYS)]);
 
-        return $this->deliver($inv);
+        return $this->sent(Invitations::invite($d, $r->user()));
     }
 
     public function resend(ClientInvitation $inv)
     {
-        abort_if($inv->accepted_at, 422);
-        $inv->forceFill(['revoked_at' => null, 'send_count' => $inv->send_count + 1])->save();
+        abort_unless(Invitations::isOpen($inv), 422);
 
-        return $this->deliver($inv);
+        return $this->sent(Invitations::resend($inv));
     }
 
-    private function deliver(ClientInvitation $inv)
+    /** @param  array{invitation: ClientInvitation, link: string}  $sent */
+    private function sent(array $sent)
     {
-        $link = $inv->refreshLink();
-        $body = str_replace([':name', ':link'], [$inv->name, $link], sp_t('inv_mail_body'));
-        $status = SpaceMail::send($inv->email, sp_t('inv_mail_subject'), $body);
-        $inv->forceFill(['mail_status' => $status])->save();
+        $inv = $sent['invitation'];
 
-        return redirect()->route('manager.invitations')->with('inv_link', ['id' => $inv->id, 'url' => $link, 'status' => $status, 'name' => $inv->name, 'phone' => $inv->phone]);
+        return redirect()->route('manager.invitations')->with('inv_link', ['id' => $inv->id, 'url' => $sent['link'], 'status' => $inv->mail_status, 'name' => $inv->name, 'phone' => $inv->phone]);
     }
 
     // ---------- Validation des comptes ----------
@@ -111,9 +105,7 @@ class ManagerController extends Controller
 
     public function revoke(ClientInvitation $inv)
     {
-        if (! $inv->accepted_at) {
-            $inv->forceFill(['revoked_at' => now()])->save();
-        }
+        Invitations::revoke($inv);
 
         return back()->with('ok', sp_t('saved'));
     }
