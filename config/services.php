@@ -32,6 +32,9 @@ return [
         'token' => env('DEPLOY_HOOK_TOKEN'),
         // Dossier releases/ ; par défaut le parent de la release en ligne.
         'releases_path' => env('DEPLOY_RELEASES_PATH'),
+        // Compte admin créé à la finalisation s'il n'existe pas (shared/.env, à retirer après la première connexion).
+        'admin_email' => env('SEED_ADMIN_EMAIL'),
+        'admin_password' => env('SEED_ADMIN_PASSWORD'),
     ],
 
     'slack' => [

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Database\Seeders\AdminSeeder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Str;
 
 /**
  * Finalise un déploiement sur l'hébergement mutualisé (pas d'accès shell) :
@@ -48,7 +51,36 @@ class DeployController extends Controller
             }
         }
 
+        $output['admin'] = $this->ensureAdminAccount();
+
         return response()->json(['status' => 'ok', 'release' => $currentRelease, 'output' => $output]);
+    }
+
+    /**
+     * Crée le compte admin (SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD de shared/.env) s'il n'existe pas.
+     * Ne modifie jamais un compte existant. La réponse finit dans les journaux GitHub Actions (dépôt
+     * public) : elle ne contient ni l'e-mail ni le mot de passe.
+     */
+    private function ensureAdminAccount(): string
+    {
+        $email = Str::lower(trim((string) config('services.deploy.admin_email')));
+        $password = (string) config('services.deploy.admin_password');
+
+        if ($email === '' || $password === '') {
+            return 'not-configured';
+        }
+
+        if (mb_strlen($password) < 12) {
+            return 'password-too-short';
+        }
+
+        if (User::where('email', $email)->exists()) {
+            return 'exists';
+        }
+
+        (new User)->forceFill(AdminSeeder::ATTRIBUTES + ['email' => $email, 'password' => $password])->save();
+
+        return 'created';
     }
 
     private function currentRelease(): string
