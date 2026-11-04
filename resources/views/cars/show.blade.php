@@ -77,9 +77,10 @@
       @if($gallery->isNotEmpty())
         <div class="kp-fiche__gallery">
           @foreach($gallery as $image)
-            <a href="{{ asset($image['src']) }}" target="_blank" rel="noopener"><img src="{{ asset($image['src']) }}" alt="{{ $image['alt'] }}" loading="lazy"></a>
+            <a href="{{ asset($image['src']) }}" data-kp-lightbox="fiche-{{ $car->slug }}" data-kp-lightbox-title="{{ $car->name }}" aria-label="Agrandir la photo {{ $loop->iteration }} sur {{ $gallery->count() }} — {{ $car->name }}"><img src="{{ asset($image['src']) }}" alt="{{ $image['alt'] }}" loading="lazy"></a>
           @endforeach
         </div>
+        @include('site.lightbox')
       @endif
     </section>
     @endif

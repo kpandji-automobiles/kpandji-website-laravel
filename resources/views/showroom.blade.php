@@ -28,17 +28,41 @@
       $cover = $images->first()['src'] ?? $model->top_image ?? $car?->hero_image;
       $highlights = collect($model->highlights ?? [])->pluck('fr')->filter()->take(4);
       $price = $car?->startingPrice();
+      // Galerie : la couverture et 4 vignettes ouvrent la visionneuse (site.lightbox) sur toutes les photos du modèle.
+      $total = $images->count();
+      $group = 'showroom-'.$model->id;
+      $caption = fn (array $image) => collect([$image['alt'] ?? null, ['ext' => 'Extérieur', 'int' => 'Intérieur'][$image['tag'] ?? ''] ?? null])->filter()->implode(' — ');
+      $lightbox = fn (array $image, int $i) => new \Illuminate\View\ComponentAttributeBag([
+          'href' => cms_asset($image['src']), 'data-kp-lightbox' => $group, 'data-kp-lightbox-title' => $model->name,
+          'data-caption' => $caption($image), 'aria-label' => 'Agrandir la photo '.($i + 1).' sur '.$total.' — '.$model->name,
+      ]);
     @endphp
     <article class="kp-showroom__model" id="{{ $model->key ?: 'modele-'.$model->id }}" data-kp-showroom-model="{{ $model->id }}">
       <div class="kp-showroom__media">
         <div class="kp-vcard__media">
-          @if($cover)<img src="{{ cms_asset($cover) }}" alt="{{ $images->first()['alt'] ?? $model->name }}" loading="{{ $loop->first ? 'eager' : 'lazy' }}">@endif
+          @if($total > 0)
+            <a class="kp-showroom__cover" {{ $lightbox($images[0], 0) }}>
+              <img src="{{ cms_asset($images[0]['src']) }}" alt="{{ $images[0]['alt'] ?? $model->name }}" loading="{{ $loop->first ? 'eager' : 'lazy' }}">
+              <span class="kp-showroom__count" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-9 8"/></svg>
+                {{ $total }} {{ $total > 1 ? 'photos' : 'photo' }}
+              </span>
+            </a>
+          @elseif($cover)
+            <img src="{{ cms_asset($cover) }}" alt="{{ $model->name }}" loading="{{ $loop->first ? 'eager' : 'lazy' }}">
+          @endif
           @if(filled($model->badge_fr))<span class="kp-vcard__badge">{{ $model->badge_fr }}</span>@endif
         </div>
-        @if($images->count() > 1)
-          <div class="kp-showroom__thumbs" aria-label="{{ content('showroomv.lbl_gallery') }}">
-            @foreach($images->slice(1, 4) as $image)
-              <a href="{{ cms_asset($image['src']) }}" target="_blank" rel="noopener"><img src="{{ cms_asset($image['src']) }}" alt="{{ $image['alt'] ?? $model->name }}" loading="lazy"></a>
+        @if($total > 1)
+          <div class="kp-showroom__thumbs" role="group" aria-label="{{ content('showroomv.lbl_gallery') }}">
+            @foreach($images->slice(1, 4) as $i => $image)
+              <a class="kp-showroom__thumb" {{ $lightbox($image, $i) }}>
+                <img src="{{ cms_asset($image['src']) }}" alt="{{ $image['alt'] ?? $model->name }}" loading="lazy">
+                @if($i === 4 && $total > 5)<span class="kp-showroom__more" aria-hidden="true">+{{ $total - 5 }}</span>@endif
+              </a>
+            @endforeach
+            @foreach($images->slice(5) as $i => $image)
+              <a hidden data-alt="{{ $image['alt'] ?? $model->name }}" {{ $lightbox($image, $i) }}></a>
             @endforeach
           </div>
         @endif
@@ -65,6 +89,7 @@
     <p class="body kp-muted">{{ content('showroomv.no_visual') }}</p>
   @endforelse
 </div>
+@include('site.lightbox')
 
 <section class="kp-home-banner">
   <div class="kp-wrap kp-home-banner__inner">
